@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>DSS - Tối ưu Giảm giá</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-bg: #F5F5F5;
+            --color-white: #FFFFFF;
+            --color-primary: #5932EA;
+            --color-text: #2a2a2a;
+            --color-text-secondary: #9197B3;
+            --color-border: #EEEEEE;
+            --border-radius-card: 14px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            display: flex; /* Bố cục Flexbox */
+        }
+
+        /* (2) CSS CHO SIDEBAR TRÁI */
+        .sidebar {
+            width: 250px;
+            background-color: var(--color-white);
+            height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        .sidebar-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; }
+        .sidebar-header .logo { width: 40px; height: 40px; background-color: var(--color-primary); border-radius: 50%; }
+        .sidebar-header h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+        .sidebar nav { flex-grow: 1; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu li { margin-bottom: 1rem; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; color: var(--color-text-secondary); transition: background-color 0.3s, color 0.3s; }
+        .sidebar-menu a.active,
+        .sidebar-menu a:hover { background-color: var(--color-primary); color: var(--color-white); }
+
+        /* (3) CSS CHO NỘI DUNG CHÍNH (TRANG DSS) */
+        .container {
+            flex-grow: 1;
+            max-width: 900px;
+            margin: 2rem;
+            padding: 0; /* Xóa padding cũ */
+            height: fit-content;
+        }
+        .container h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        .section {
+            background-color: var(--color-white);
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-border);
+            padding: 1.5rem 2rem; /* Thêm padding */
+            border-radius: var(--border-radius-card);
+            box-shadow: var(--box-shadow);
+        }
+        .section h2 {
+            color: var(--color-text);
+            font-weight: 600;
+            margin-top: 0;
+        }
+
+        /* CSS cho Form */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; }
+        label { margin-bottom: 0.5rem; font-weight: 500; color: var(--color-text-secondary); font-size: 0.9rem; }
+
+        select, input[type="text"], input[type="number"] {
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+            background-color: var(--color-bg);
+        }
+        input[readonly] { background-color: #eee; }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 1rem;
+        }
+
+        /* CSS cho Kết quả */
+        .output-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+        .insight { background-color: #e6f7ff; border: 1px solid #b3e0ff; padding: 1rem; border-radius: 4px; }
+
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo"></div>
+        <h2>DSS</h2>
+    </div>
+    <nav>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/dashboard}">
+                <span>Overview</span>
+            </a></li>
+
+            <li><a th:href="@{/dss/discount}" class="active"> <span>DSS Giảm giá</span>
+            </a></li>
+
+            <li><a th:href="@{/products/list}">
+                <span>Products</span>
+            </a></li>
+            <li><a href="#">
+                <span>Orders</span>
+            </a></li>
+            <li><a href="#"> <span>Customers</span>
+            </a></li>
+        </ul>
+    </nav>
+</aside>
+
+<div class="container">
+    <h1>Giảm giá Tối ưu theo Khu vực</h1>
+
+    <div class="section">
+        <h2>Thiết lập Mô phỏng</h2>
+        <form th:action="@{/dss/discount/calculate}" method="post">
+            <div class="form-grid">
+
+                <div class="form-group">
+                    <label for="product">Nhập Sản phẩm (StockCode):</label>
+                    <input type="text" id="product" name="product" th:value="${selectedStockCode}" placeholder="Ví dụ: 22633" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="country">Chọn Quốc gia:</label>
+                    <select id="country" name="country" required>
+                        <option value="">-- Chọn --</option>
+                        <option th:each="c : ${countries}"
+                                th:value="${c}"
+                                th:text="${c}"
+                                th:selected="${c == selectedCountry}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="productName">Tên Sản phẩm (Description):</label>
+                    <input type="text" id="productName" readonly>
+                </div>
+
+                <div class="form-group"></div>
+
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label>Tiêu chí Tối ưu:</label>
+                    <div>
+                        <input type="radio" id="opt-revenue" name="optimizeOn" value="revenue" th:checked="${selectedOptimizeOn == 'revenue' or selectedOptimizeOn == null}">
+                        <label for="opt-revenue" style="font-weight: normal; margin-right: 1rem;">Tối ưu Doanh thu</label>
+
+                        <input type="radio" id="opt-profit" name="optimizeOn" value="profit" th:checked="${selectedOptimizeOn == 'profit'}">
+                        <label for="opt-profit" style="font-weight: normal;">Tối ưu Lợi nhuận</label>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Chạy Phân tích</button>
+        </form>
+    </div>
+
+    <div class="section" th:if="${dssResult != null && dssResult.optimalScenario != null}">
+        <h2>Kết quả DSS</h2>
+        <div class="output-grid">
+            <div class="form-group">
+                <label>Mức Giảm giá Tối ưu:</label>
+                <input type="text" th:value="${dssResult.optimalScenario.discountPercent} + '%'" readonly>
+            </div>
+            <div class="form-group">
+                <label>Doanh thu Dự kiến:</label>
+                <input type="text" th:value="${#numbers.formatDecimal(dssResult.optimalScenario.expectedRevenue, 1, 'COMMA', 2, 'POINT')}" readonly>
+            </div>
+            <div class="form-group">
+                <label>Lợi nhuận Dự kiến:</label>
+                <input type="text" th:value="${#numbers.formatDecimal(dssResult.optimalScenario.expectedProfit, 1, 'COMMA', 2, 'POINT')}" readonly>
+            </div>
+        </div>
+
+        <canvas id="dssChart" style="margin-top: 1.5rem;"></canvas>
+    </div>
+
+    <div class="section insight" th:if="${dssResult != null && dssResult.analysis != null}">
+        <h2>Phân tích & Gợi ý</h2>
+        <p th:text="${dssResult.analysis}">Phân tích...</p>
+        <p th:text="${dssResult.recommendation}" style="font-weight: bold; color: #0056b3;">Gợi ý...</p>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+
+        const stockCodeInput = document.getElementById('product');
+        const productNameInput = document.getElementById('productName');
+
+        stockCodeInput.addEventListener('blur', async function() {
+            const stockCode = this.value;
+            productNameInput.value = 'Đang tải...';
+            if (!stockCode) { productNameInput.value = ''; return; }
+            try {
+                const response = await fetch('/api/dss/product-details/' + stockCode);
+                if (!response.ok) { productNameInput.value = 'Lỗi: Không tìm thấy sản phẩm'; return; }
+                const productData = await response.json();
+                productNameInput.value = productData.description;
+            } catch (error) {
+                console.error('Lỗi khi lấy chi tiết sản phẩm:', error);
+                productNameInput.value = 'Lỗi: Không thể kết nối API';
+            }
+        });
+
+        /*<![CDATA[*/
+        var dssResult = /*[[${dssResult}]]*/ null;
+        if (dssResult && dssResult.allScenarios && dssResult.allScenarios.length > 0) {
+            var scenarios = dssResult.allScenarios;
+            var chartLabels = scenarios.map(function(s) { return s.discountPercent + '%'; });
+            var revenueData = scenarios.map(function(s) { return s.expectedRevenue; });
+            var profitData = scenarios.map(function(s) { return s.expectedProfit; });
+
+            // Sửa lỗi 'dd' thành '2d'
+            const ctx = document.getElementById('dssChart').getContext('2d');
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [
+                        { label: 'Doanh thu (Revenue)', data: revenueData, borderColor: '#5932EA', tension: 0.1 },
+                        { label: 'Lợi nhuận (Profit)', data: profitData, borderColor: '#00B087', tension: 0.1 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: { display: true, text: 'Mô phỏng Doanh thu & Lợi nhuận' }
+                    }
+                }
+            });
+        }
+        /*]]>*/
+    });
+</script>
+</body>
+</html>

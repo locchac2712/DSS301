@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${product.id} != null ? 'Edit Product' : 'Add Product'">Product Form</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-primary: #007bff;
+            --color-light-grey: #f7f8fc;
+            --color-border: #f0f1f7;
+            --color-text: #4a4a4a;
+            --color-label: #838383;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--color-light-grey); color: var(--color-text); margin: 0; padding: 2rem; }
+        .form-container { max-width: 900px; margin: 0 auto; background-color: #fff; padding: 2.5rem; border-radius: var(--border-radius); box-shadow: var(--box-shadow); }
+        .form-header h1 { font-size: 1.8rem; font-weight: 600; margin: 0 0 0.5rem 0; }
+        .form-header p { font-size: 0.9rem; color: var(--color-label); margin: 0 0 2rem 0; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; margin-bottom: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 0.9rem; font-weight: 500; color: var(--color-label); margin-bottom: 0.5rem; }
+        .form-group input { font-family: 'Poppins', sans-serif; font-size: 1rem; padding: 0.9rem 1.2rem; border: none; background-color: var(--color-light-grey); border-radius: var(--border-radius); border: 2px solid var(--color-light-grey); transition: border-color 0.3s; }
+        .form-group input:focus { outline: none; border-color: var(--color-primary); background-color: #fff; }
+        .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
+        .btn { font-family: 'Poppins', sans-serif; padding: 0.8rem 1.5rem; border: none; border-radius: var(--border-radius); font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: opacity 0.3s; }
+        .btn:hover { opacity: 0.85; }
+        .btn-primary { background-color: var(--color-primary); color: #fff; }
+        .btn-secondary { background-color: var(--color-border); color: var(--color-label); }
+    </style>
+</head>
+<body>
+
+<div class="form-container">
+
+    <form th:action="@{/products/save}" th:object="${product}" method="post">
+
+        <input type="hidden" th:field="*{id}" />
+
+        <div class="form-header">
+            <h1 th:text="${product.id} != null ? 'Edit Product Details' : 'Add New Product'">Product Details</h1>
+            <p>Enter key product information and details</p>
+        </div>
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="name">Product Name</label>
+                <input type="text" id="name" th:field="*{name}" placeholder="Enter product name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input type="text" id="category" th:field="*{category}" placeholder="Enter category">
+            </div>
+
+            <div class="form-group">
+                <label for="price">Price</label>
+                <input type="text"
+                       inputmode="numeric"
+                       id="price"
+                       name="price"
+                       th:value="${product.price != null ? #numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') : ''}"
+                       placeholder="Enter price"
+                       required>
+            </div>
+
+            <div class="form-group">
+                <label for="stockQuantity">Stock Quantity</label>
+                <input type="number" id="stockQuantity" th:field="*{stockQuantity}" placeholder="Enter stock quantity" required>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <a th:href="@{/products/list}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save Product</button>
+        </div>
+
+    </form>
+</div>
+
+</body>
+</html>
