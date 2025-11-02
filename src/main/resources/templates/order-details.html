@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Details</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-primary: #007bff;
+            --color-success: #198754;
+            --color-light-grey: #f7f8fc;
+            --color-grey: #a0a0a0;
+            --color-dark-grey: #838383;
+            --color-dark: #292929;
+            --color-border: #f0f1f7;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--color-light-grey); 
+            color: var(--color-dark); 
+            margin: 0; 
+            padding: 2rem; 
+        }
+        a { text-decoration: none; color: var(--color-primary); }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        /* Header */
+        .page-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 2rem; 
+        }
+        .page-header h1 { 
+            font-size: 1.8rem; 
+            font-weight: 600; 
+            margin: 0 0 0.5rem 0;
+        }
+        .breadcrumb {
+            color: var(--color-grey);
+            font-size: 0.9rem;
+        }
+        .breadcrumb a {
+            color: var(--color-primary);
+        }
+        .back-btn {
+            padding: 0.7rem 1.5rem;
+            background-color: #fff;
+            color: var(--color-dark);
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .back-btn:hover {
+            background-color: var(--color-light-grey);
+        }
+
+        /* Content Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Card */
+        .card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+        }
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 1rem 0;
+            color: var(--color-dark);
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .info-label {
+            color: var(--color-grey);
+            font-size: 0.9rem;
+        }
+        .info-value {
+            font-weight: 500;
+            color: var(--color-dark);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-badge.pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-badge.completed {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        .status-badge.cancelled {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        .status-badge.processing {
+            background-color: #cfe2ff;
+            color: #084298;
+        }
+
+        /* Order Items Table */
+        .items-section {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+        }
+        table.items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        table.items-table th,
+        table.items-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+        table.items-table th {
+            color: var(--color-grey);
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            background-color: var(--color-light-grey);
+        }
+        table.items-table td {
+            color: var(--color-dark);
+            font-weight: 500;
+        }
+        .price-col {
+            color: var(--color-success);
+            font-weight: 600;
+        }
+
+        /* Summary */
+        .order-summary {
+            background-color: var(--color-light-grey);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-top: 1.5rem;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+        }
+        .summary-row.total {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--color-dark);
+            border-top: 2px solid var(--color-border);
+            padding-top: 1rem;
+            margin-top: 0.5rem;
+        }
+        .summary-label {
+            color: var(--color-grey);
+        }
+        .summary-value {
+            font-weight: 600;
+            color: var(--color-success);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header class="page-header">
+        <div>
+            <h1>📋 Order Details</h1>
+            <p class="breadcrumb">
+                <a href="/">Home</a> / 
+                <a href="/orders/list">Orders</a> / 
+                <span th:text="${order.id}">Order ID</span>
+            </p>
+        </div>
+        <a href="/orders/list" class="back-btn">← Back to Orders</a>
+    </header>
+
+    <!-- Order & Customer Info -->
+    <div class="content-grid">
+        <!-- Order Information -->
+        <div class="card">
+            <h2 class="card-title">📦 Order Information</h2>
+            <div class="info-row">
+                <span class="info-label">Order ID</span>
+                <span class="info-value" th:text="${order.id}">ORD001</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Order Date</span>
+                <span class="info-value" th:text="${#temporals.format(order.orderDate, 'dd MMMM yyyy')}">01 November 2024</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Status</span>
+                <span class="status-badge" 
+                      th:classappend="${order.status?.toLowerCase()}"
+                      th:text="${order.status}">Pending</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Total Amount</span>
+                <span class="info-value price-col" 
+                      th:text="'$' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">$999.99</span>
+            </div>
+        </div>
+
+        <!-- Customer Information -->
+        <div class="card">
+            <h2 class="card-title">👤 Customer Information</h2>
+            <div class="info-row">
+                <span class="info-label">Customer ID</span>
+                <span class="info-value" th:text="${order.customer?.id ?: 'N/A'}">CUST001</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Name</span>
+                <span class="info-value" th:text="${order.customer?.customerName ?: 'N/A'}">Customer Name</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value" th:text="${order.customer?.email ?: 'N/A'}">email@example.com</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Country</span>
+                <span class="info-value" th:text="${order.customer?.country ?: 'N/A'}">Vietnam</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Items -->
+    <div class="items-section">
+        <h2 class="card-title">📋 Order Items</h2>
+        
+        <table class="items-table">
+            <thead>
+            <tr>
+                <th style="width: 50px;">#</th>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th style="text-align: right;">Unit Price</th>
+                <th style="text-align: center;">Quantity</th>
+                <th style="text-align: right;">Subtotal</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="item, iterStat : ${order.items}">
+                <td th:text="${iterStat.count}">1</td>
+                <td th:text="${item.product?.id ?: 'N/A'}">PROD001</td>
+                <td>
+                    <div th:text="${item.product?.name ?: 'Unknown Product'}">Product Name</div>
+                    <div style="font-size: 0.8rem; color: var(--color-grey);" 
+                         th:text="${item.product?.category}">Category</div>
+                </td>
+                <td style="text-align: right;" class="price-col" 
+                    th:text="'$' + ${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')}">$99.99</td>
+                <td style="text-align: center;" th:text="${item.quantity}">2</td>
+                <td style="text-align: right;" class="price-col" 
+                    th:text="'$' + ${#numbers.formatDecimal(item.unitPrice * item.quantity, 1, 'COMMA', 2, 'POINT')}">$199.98</td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Order Summary -->
+        <div class="order-summary">
+            <div class="summary-row">
+                <span class="summary-label">Subtotal</span>
+                <span class="summary-value" 
+                      th:text="'$' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">$999.99</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Tax (0%)</span>
+                <span class="summary-value">$0.00</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">Shipping</span>
+                <span class="summary-value">$0.00</span>
+            </div>
+            <div class="summary-row total">
+                <span>Total Amount</span>
+                <span th:text="'$' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">$999.99</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
+

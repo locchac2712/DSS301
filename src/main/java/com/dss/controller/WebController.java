@@ -1,7 +1,9 @@
 package com.dss.controller;
 
 import com.dss.model.Product;
+import com.dss.model.Order;
 import com.dss.service.ProductService;
+import com.dss.service.OrderService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,9 +20,11 @@ import java.util.Optional;
 public class WebController {
 
     private final ProductService productService;
+    private final OrderService orderService;
 
-    public WebController(ProductService productService) {
+    public WebController(ProductService productService, OrderService orderService) {
         this.productService = productService;
+        this.orderService = orderService;
     }
 
 
@@ -121,5 +125,59 @@ public class WebController {
     public String deleteProduct(@PathVariable("id") String id) {
         productService.delete(id);
         return "redirect:/products/list"; // Chuyển hướng về trang danh sách
+    }
+
+    /**
+     * ========================================
+     * ORDER MANAGEMENT
+     * ========================================
+     */
+
+    /**
+     * 1. ORDER LIST (Hiển thị Danh sách Đơn hàng)
+     * Hỗ trợ phân trang
+     */
+    @GetMapping("/orders/list")
+    public String showOrderList(
+            Model model,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        // (1) Xử lý Pageable (Spring data page bắt đầu từ 0)
+        Pageable pageable = PageRequest.of(
+                page - 1,
+                size,
+                Sort.by("orderDate").descending() // Sắp xếp theo ngày mới nhất
+        );
+
+        // (2) Lấy dữ liệu Page từ Service
+        Page<Order> orderPage = orderService.getOrders(pageable);
+
+        // (3) Thêm Page object vào Model
+        model.addAttribute("orderPage", orderPage);
+
+        // (4) Tạo danh sách các số trang để hiển thị trên UI
+        int totalPages = orderPage.getTotalPages();
+        if (totalPages > 0) {
+            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
+                    .boxed()
+                    .collect(Collectors.toList());
+            model.addAttribute("pageNumbers", pageNumbers);
+        }
+
+        return "order-list";
+    }
+
+    /**
+     * 2. ORDER DETAILS (Hiển thị Chi tiết Đơn hàng)
+     */
+    @GetMapping("/orders/details/{id}")
+    public String showOrderDetails(@PathVariable("id") String id, Model model) {
+        Order order = orderService.getById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng với ID: " + id));
+
+        model.addAttribute("order", order);
+
+        return "order-details";
     }
 }
