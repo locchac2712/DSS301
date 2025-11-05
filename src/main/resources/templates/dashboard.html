@@ -8,11 +8,10 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
-        /* 1. Thiết lập Cơ bản */
         :root {
-            --color-bg: #F5F5F5; /* Nền xám nhạt như mẫu */
+            --color-bg: #F5F5F5;
             --color-white: #FFFFFF;
-            --color-primary: #5932EA; /* Màu tím/xanh chính */
+            --color-primary: #5932EA;
             --color-text: #2a2a2a;
             --color-text-secondary: #9197B3;
             --color-border: #EEEEEE;
@@ -21,245 +20,64 @@
             --color-alert-bg: #FFFAEB;
             --color-alert-low: #FFB54A;
             --color-alert-dip: #D0004B;
-            --border-radius-main: 30px; /* Bo góc lớn cho layout chính */
-            --border-radius-card: 14px; /* Bo góc cho thẻ */
+            --border-radius-card: 14px;
             --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--color-bg); color: var(--color-text); margin: 0; display: flex; }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--color-bg);
-            color: var(--color-text);
-            margin: 0;
-            display: flex;
-        }
+        /* (Sidebar Trái) */
+        .sidebar { width: 250px; background-color: var(--color-white); height: 100vh; padding: 2rem; box-sizing: border-box; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; z-index: 10; }
+        .sidebar-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; }
+        .sidebar-header .logo { width: 40px; height: 40px; background-color: var(--color-primary); border-radius: 50%; }
+        .sidebar-header h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+        .sidebar nav { flex-grow: 1; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu li { margin-bottom: 1rem; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; color: var(--color-text-secondary); transition: background-color 0.3s, color 0.3s; }
+        .sidebar-menu a.active, .sidebar-menu a:hover { background-color: var(--color-primary); color: var(--color-white); }
 
-        /* 2. Sidebar Trái */
-        .sidebar {
-            width: 250px;
-            background-color: var(--color-white);
-            height: 100vh;
-            padding: 2rem;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-        }
-        .sidebar-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2.5rem;
-        }
-        .sidebar-header .logo {
-            width: 40px;
-            height: 40px;
-            background-color: var(--color-primary);
-            border-radius: 50%;
-        }
-        .sidebar-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
+        /* (Nội dung Chính) */
+        .main-container { flex-grow: 1; margin-left: 250px; /* Bằng chiều rộng sidebar */ display: flex; }
+        .main-content { flex-grow: 1; padding: 2rem; overflow-y: auto; }
+        .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .main-header h1 { margin: 0; font-size: 1.8rem; font-weight: 600; }
 
-        .sidebar nav {
-            flex-grow: 1;
-        }
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .sidebar-menu li {
-            margin-bottom: 1rem;
-        }
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            color: var(--color-text-secondary);
-            transition: background-color 0.3s, color 0.3s;
-        }
-        .sidebar-menu a.active,
-        .sidebar-menu a:hover {
-            background-color: var(--color-primary);
-            color: var(--color-white);
-        }
-
-        /* 3. Vùng Nội dung Chính (Main Content) */
-        .main-container {
-            flex-grow: 1;
-            display: flex;
-        }
-
-        .main-content {
-            flex-grow: 1;
-            padding: 2rem;
-            overflow-y: auto;
-            height: 100vh;
-            box-sizing: border-box;
-        }
-
-        .main-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-        }
-        .main-header h1 {
-            margin: 0;
-            font-size: 1.8rem;
-            font-weight: 600;
-        }
-
-        /* 4. Thẻ KPI Tóm tắt (Performance Overview) */
-        .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .kpi-card {
-            background-color: var(--color-white);
-            padding: 1.5rem;
-            border-radius: var(--border-radius-card);
-            border: 1px solid var(--color-border);
-        }
-        .kpi-card h4 {
-            font-size: 0.9rem;
-            color: var(--color-text-secondary);
-            font-weight: 500;
-            margin: 0 0 0.5rem 0;
-        }
-        .kpi-card h2 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin: 0 0 0.5rem 0;
-        }
-        .kpi-card .kpi-change {
-            font-weight: 600;
-        }
+        /* (Thẻ KPI) */
+        .kpi-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .kpi-card { background-color: var(--color-white); padding: 1.5rem; border-radius: var(--border-radius-card); border: 1px solid var(--color-border); box-shadow: var(--box-shadow); }
+        .kpi-card h4 { font-size: 0.9rem; color: var(--color-text-secondary); font-weight: 500; margin: 0 0 0.5rem 0; }
+        .kpi-card h2 { font-size: 1.8rem; font-weight: 600; margin: 0 0 0.5rem 0; }
+        .kpi-card .kpi-change { font-weight: 600; font-size: 0.9rem; }
         .kpi-card .kpi-change.positive { color: var(--color-green); }
         .kpi-card .kpi-change.negative { color: var(--color-red); }
 
-        /* 5. Vùng Biểu đồ */
-        .charts-container {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .chart-card {
-            background-color: var(--color-white);
-            padding: 1.5rem;
-            border-radius: var(--border-radius-card);
-            border: 1px solid var(--color-border);
-        }
-        .chart-card h3 {
-            margin-top: 0;
-            font-weight: 600;
-        }
+        /* (Vùng Biểu đồ) */
+        .charts-container { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+        .chart-card { background-color: var(--color-white); padding: 1.5rem; border-radius: var(--border-radius-card); border: 1px solid var(--color-border); box-shadow: var(--box-shadow); }
+        .chart-card h3 { margin-top: 0; font-weight: 600; }
 
-        /* 6. Vùng Bảng Dữ liệu (Top Products) */
-        .table-container {
-            background-color: var(--color-white);
-            padding: 1.5rem;
-            border-radius: var(--border-radius-card);
-            border: 1px solid var(--color-border);
-        }
-        .table-container h3 {
-            margin-top: 0;
-            font-weight: 600;
-        }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .data-table th, .data-table td {
-            padding: 0.8rem;
-            text-align: left;
-            border-bottom: 1px solid var(--color-border);
-            color: var(--color-text-secondary);
-            font-weight: 500;
-        }
-        .data-table th {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-        }
-        .data-table td {
-            color: var(--color-text);
-        }
+        /* (Vùng Bảng) */
+        .table-container { background-color: var(--color-white); padding: 1.5rem; border-radius: var(--border-radius-card); border: 1px solid var(--color-border); box-shadow: var(--box-shadow); }
+        .table-container h3 { margin-top: 0; font-weight: 600; }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 0.8rem; text-align: left; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); font-weight: 500; }
+        .data-table th { font-size: 0.8rem; text-transform: uppercase; }
+        .data-table td { color: var(--color-text); }
 
-        /* 7. Sidebar Phải (Alerts) */
-        .right-sidebar {
-            width: 300px;
-            padding: 2rem;
-            height: 100vh;
-            box-sizing: border-box;
-            background-color: #FBFBFB; /* Hơi khác nền chính */
-        }
-        .user-profile {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        .user-profile img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #ccc;
-        }
-
-        .cta-card {
-            padding: 1rem;
-            border-radius: var(--border-radius-card);
-            text-align: center;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: var(--color-text);
-        }
-        .cta-card.low-stock { background-color: #FEF5E0; /* Vàng nhạt */ }
-        .cta-card.top-category { background-color: #E6E0FF; /* Tím nhạt */ }
-
-        .alerts-feed h3 {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        .alert-item {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-            background-color: var(--color-white);
-            padding: 1rem;
-            border-radius: 10px;
-            border: 1px solid var(--color-border);
-        }
-        .alert-item .icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: grid;
-            place-items: center;
-            font-weight: bold;
-            color: var(--color-white);
-        }
+        /* (Sidebar Phải) */
+        .right-sidebar { width: 300px; padding: 2rem; height: 100vh; box-sizing: border-box; background-color: #FBFBFB; flex-shrink: 0; }
+        .user-profile { display: flex; align-items: center; justify-content: flex-end; gap: 1rem; margin-bottom: 2rem; }
+        .user-profile img { width: 40px; height: 40px; border-radius: 50%; background-color: #ccc; }
+        .cta-card { padding: 1rem; border-radius: var(--border-radius-card); text-align: center; font-weight: 600; margin-bottom: 1rem; color: var(--color-text); }
+        .cta-card.low-stock { background-color: #FEF5E0; }
+        .cta-card.top-category { background-color: #E6E0FF; }
+        .alerts-feed h3 { font-size: 1.2rem; font-weight: 600; }
+        .alert-item { display: flex; gap: 1rem; margin-bottom: 1rem; background-color: var(--color-white); padding: 1rem; border-radius: 10px; border: 1px solid var(--color-border); }
+        .alert-item .icon { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: bold; color: var(--color-white); }
         .alert-item.low-stock .icon { background-color: var(--color-alert-low); }
         .alert-item.dip .icon { background-color: var(--color-alert-dip); }
-        .alert-item p {
-            margin: 0;
-            font-size: 0.9rem;
-            color: var(--color-text-secondary);
-        }
-        .alert-item p strong {
-            color: var(--color-text);
-        }
-
+        .alert-item p { margin: 0; font-size: 0.9rem; color: var(--color-text-secondary); }
+        .alert-item p strong { color: var(--color-text); }
     </style>
 </head>
 <body>
@@ -271,12 +89,23 @@
     </div>
     <nav>
         <ul class="sidebar-menu">
-            <li><a th:href="@{/dashboard}"><span>Overview</span></a></li>
-            <li><a th:href="@{/dss/discount}"><span>DSS Giảm giá</span></a></li>
-            <li><a th:href="@{/products/list}"><span>Products (Postgre)</span></a></li>
-            <!--            <li><a href="#"><span>Orders</span></a></li>-->
-            <!--            <li><a href="#"><span>Customers</span></a></li>-->
-            <li><a th:href="@{/mongo/list}" class="active"><b>Mongo Data Product</b></a></li>
+            <li><a th:href="@{/dashboard}" class="active"> <span>Overview</span>
+            </a></li>
+            <li><a th:href="@{/dss/discount}">
+                <span>DSS Giảm giá</span>
+            </a></li>
+            <li><a th:href="@{/products/list}">
+                <span>Products (Master)</span>
+            </a></li>
+            <li><a href="#">
+                <span>Orders</span>
+            </a></li>
+            <li><a href="#">
+                <span>Customers</span>
+            </a></li>
+            <li><a th:href="@{/mongo/list}">
+                <b>(Mongo Data)</b>
+            </a></li>
         </ul>
     </nav>
 </aside>
@@ -291,39 +120,37 @@
         <section class="kpi-container">
             <div class="kpi-card">
                 <h4>Total Revenue</h4>
-                <h2 id="kpi-revenue">$0</h2>
-                <span class="kpi-change positive">...</span>
+                <h2 id="kpi-revenue">$0.00</h2>
+                <span id="kpi-revenue-change" class="kpi-change positive">...</span>
             </div>
             <div class="kpi-card">
                 <h4>Total Orders</h4>
                 <h2 id="kpi-orders">0</h2>
-                <span class="kpi-change positive">...</span>
+                <span id="kpi-orders-change" class="kpi-change positive">...</span>
             </div>
             <div class="kpi-card">
                 <h4>Avg. Order Value</h4>
                 <h2 id="kpi-aov">$0.00</h2>
-                <span class="kpi-change negative">...</span>
+                <span id="kpi-aov-change" class="kpi-change negative">...</span>
             </div>
             <div class="kpi-card">
                 <h4>Total Customers</h4>
                 <h2 id="kpi-customers">0</h2>
-                <span class="kpi-change positive">...</span>
+                <span id="kpi-customers-change" class="kpi-change positive">...</span>
             </div>
         </section>
 
         <section class="charts-container">
             <div class="chart-card">
                 <h3>Sales Revenue Over Time</h3>
-                <canvas id="salesChart"></canvas>
-            </div>
+                <canvas id="salesChart"></canvas> </div>
             <div class="chart-card">
                 <h3>Revenue by Category</h3>
-                <canvas id="categoryChart"></canvas>
-            </div>
+                <canvas id="categoryChart"></canvas> </div>
         </section>
 
         <section class="table-container">
-            <h3>Top Best-Selling Products</h3>
+            <h3>Top Best-Selling Products (PostgreSQL)</h3>
             <table class="data-table">
                 <thead>
                 <tr>
@@ -336,11 +163,11 @@
                 </thead>
                 <tbody>
                 <tr th:each="product : ${topSellingProducts}">
-                    <td th:text="${product.id}">1</td>
-                    <td th:text="${product.name}">iPhone 15 Pro</td>
+                    <td th:text="${product.id}">P-010</td>
+                    <td th:text="${product.name}">Kindle Paperwhite</td>
                     <td th:text="${product.category}">Electronics</td>
-                    <td th:text="${product.stockQuantity}">25</td>
-                    <td th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">$999.99</td>
+                    <td th:text="${product.stockQuantity}">120</td>
+                    <td th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">$139.99</td>
                 </tr>
                 </tbody>
             </table>
@@ -355,113 +182,143 @@
 
 <!--        <div class="cta-card low-stock">-->
 <!--            <h3 th:text="${lowStockProducts.size()} + ' Items'">5 Items</h3>-->
-<!--            <span>Running Low on Stock</span>-->
+<!--            <span>Running Low on Stock (PostgreSQL)</span>-->
 <!--        </div>-->
 <!--        <div class="cta-card top-category">-->
 <!--            <h3>Electronics</h3>-->
-<!--            <span>Top Performing Category</span>-->
+<!--            <span>Top Performing Category (Mongo)</span>-->
 <!--        </div>-->
 
 <!--        <div class="alerts-feed">-->
-<!--            <h3>Alerts</h3>-->
-
+<!--            <h3>Alerts (Low Stock)</h3>-->
 <!--            <div class="alert-item low-stock" th:each="product : ${lowStockProducts}">-->
 <!--                <div class="icon">!</div>-->
 <!--                <div>-->
 <!--                    <p><strong>Low Inventory</strong></p>-->
-<!--                    <p th:text="${product.name} + ' running low. Restock ASAP.'">Product running low</p>-->
-<!--                </div>-->
-<!--            </div>-->
-
-<!--            <div class="alert-item dip">-->
-<!--                <div class="icon">!</div>-->
-<!--                <div>-->
-<!--                    <p><strong>Conversion Dip</strong></p>-->
-<!--                    <p>Rates have dropped. Investigate.</p>-->
+<!--                    <p th:text="${product.name} + ' running low (' + ${product.stockQuantity} + ' left).'">Product running low</p>-->
 <!--                </div>-->
 <!--            </div>-->
 <!--        </div>-->
 <!--    </aside>-->
 </div>
 
+
 <script>
 
-    // (1) HÀM ĐỂ CẬP NHẬT KPIs (BỊ THIẾU TRONG TỆP CỦA BẠN)
-    async function loadKpiData() {
-        try {
-            // Gọi API bạn đã tạo
-            const response = await fetch('/api/dashboard/kpis');
+    // (A) Chờ cho toàn bộ tài liệu HTML được tải xong
+    document.addEventListener('DOMContentLoaded', () => {
 
-            // Kiểm tra xem API có trả về lỗi (như 404, 500) không
-            if (!response.ok) {
-                throw new Error('Network response was not ok. Status: ' + response.status);
+        // (B) HÀM TẢI KPI (Không đổi)
+        async function loadKpiData() {
+            try {
+                const response = await fetch('/api/dashboard/kpis');
+                if (!response.ok) throw new Error('Network response was not ok. Status: ' + response.status);
+
+                const data = await response.json();
+
+                // Cập nhật HTML
+                document.getElementById('kpi-revenue').textContent = '$' + data.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('kpi-orders').textContent = data.totalOrders.toLocaleString('en-US');
+                document.getElementById('kpi-aov').textContent = '$' + data.avgOrderValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('kpi-customers').textContent = data.totalCustomers.toLocaleString('en-US');
+
+            } catch (error) {
+                console.error('Error loading KPI data:', error);
+            }
+        }
+
+        // (C) HÀM TẢI BIỂU ĐỒ (Đã cập nhật)
+        async function loadCharts() {
+
+            // --- 1. BIỂU ĐỒ ĐƯỜNG (Dữ liệu thật) ---
+            try {
+                const response = await fetch('/api/dashboard/sales-over-time');
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const salesData = await response.json();
+                const salesLabels = salesData.map(item => item.period);
+                const salesValues = salesData.map(item => item.total);
+
+                const ctxSales = document.getElementById('salesChart').getContext('2d');
+                new Chart(ctxSales, {
+                    type: 'line',
+                    data: {
+                        labels: salesLabels,
+                        datasets: [{
+                            label: 'Revenue',
+                            data: salesValues,
+                            borderColor: 'var(--color-primary)',
+                            tension: 0.3,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading Sales Chart data:', error);
             }
 
-            const data = await response.json();
+            // --- 2. BIỂU ĐỒ TRÒN (TẢI DỮ LIỆU THẬT + TÍNH %) ---
+            try {
+                const response = await fetch('/api/dashboard/revenue-by-category');
+                if (!response.ok) throw new Error('Network response was not ok');
 
-            // Cập nhật HTML bằng các ID đã thêm
-            // (Thêm toLocaleString để định dạng số cho đẹp)
-            document.getElementById('kpi-revenue').textContent = '$' + data.totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            document.getElementById('kpi-orders').textContent = data.totalOrders.toLocaleString('en-US');
-            document.getElementById('kpi-aov').textContent = '$' + data.avgOrderValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            document.getElementById('kpi-customers').textContent = data.totalCustomers.toLocaleString('en-US');
+                const categoryData = await response.json();
+                const chartLabels = categoryData.map(item => item.category);
+                const chartValues = categoryData.map(item => item.totalRevenue);
 
-        } catch (error) {
-            // Nếu lỗi, in lỗi ra Console để gỡ rối
-            console.error('Error loading KPI data:', error);
+                // (MỚI) Tính tổng doanh thu để tính %
+                const totalRevenue = chartValues.reduce((sum, value) => sum + value, 0);
+
+                const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+                new Chart(ctxCategory, {
+                    type: 'doughnut',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            data: chartValues,
+                            backgroundColor: ['#5932EA', '#8A6DFF', '#C4B5FD', '#A5D6A7', '#FFB74D', '#FF8A65']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            },
+                            // (MỚI) Thêm Tooltip Callback để hiển thị %
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const label = context.label || '';
+                                        const value = context.raw || 0;
+
+                                        // Tính %
+                                        const percentage = ((value / totalRevenue) * 100).toFixed(1); // Làm tròn 1 chữ số
+
+                                        return `${label}: ${percentage}%`; // (ví dụ: "Electronics: 45.5%")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading Category Chart data:', error);
+            }
         }
-    }
 
-    // (2) HÀM ĐỂ CẬP NHẬT BIỂU ĐỒ (Phần bạn đã có)
-    function loadCharts() {
-        // Dữ liệu giả - Sau này bạn sẽ dùng fetch() để gọi API
-        const salesData = {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-            values: [12000, 19000, 15000, 22000, 18000, 25000]
-        };
+        // (D) GỌI CÁC HÀM
+        loadKpiData();
+        loadCharts();
 
-        const categoryData = {
-            labels: ["Electronics", "Laptops", "Headphones"],
-            values: [55, 30, 15]
-        };
-
-        // 1. Biểu đồ Đường (Sales Chart)
-        const ctxSales = document.getElementById('salesChart').getContext('2d');
-        new Chart(ctxSales, {
-            type: 'line',
-            data: {
-                labels: salesData.labels,
-                datasets: [{
-                    label: 'Revenue',
-                    data: salesData.values,
-                    borderColor: 'var(--color-primary)',
-                    tension: 0.3,
-                    fill: false
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
-
-        // 2. Biểu đồ Tròn (Category Chart)
-        const ctxCategory = document.getElementById('categoryChart').getContext('2d');
-        new Chart(ctxCategory, {
-            type: 'doughnut',
-            data: {
-                labels: categoryData.labels,
-                datasets: [{
-                    data: categoryData.values,
-                    backgroundColor: ['#5932EA', '#8A6DFF', '#C4B5FD']
-                }]
-            },
-            options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-        });
-    }
-
-    // (3) GỌI CÁC HÀM KHI TẢI TRANG
-    document.addEventListener('DOMContentLoaded', () => {
-        loadKpiData(); // Tải KPI thật từ API
-        loadCharts();  // Tải biểu đồ (vẫn là giả)
-    });
+    }); // (E) KẾT THÚC: Đóng 'DOMContentLoaded'
 </script>
+
 </body>
 </html>
