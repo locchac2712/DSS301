@@ -1,6 +1,10 @@
 package com.dss.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 import java.util.Objects; // Import Objects
@@ -11,17 +15,23 @@ public class Product {
 
     @Id
     @Column(name = "stock_code")
+    @NotBlank(message = "Stock Code không được để trống")
     private String id;
 
     @Column(name = "description")
+    @NotBlank(message = "Tên sản phẩm không được để trống") // (3)
     private String name;
 
+    @NotBlank(message = "Danh mục không được để trống")
     private String category;
 
     @Column(name = "unit_price")
+    @NotNull(message = "Giá không được để trống") // (5) Dùng @NotNull cho số
+    @DecimalMin(value = "0.0", inclusive = false, message = "Giá phải lớn hơn 0")
     private BigDecimal price;
 
     @Column(name = "stock_quantity")
+    @Min(value = 0, message = "Số lượng không được âm")
     private int stockQuantity;
 
     // 1. Constructor rỗng (Bắt buộc cho JPA)
