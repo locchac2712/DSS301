@@ -4,6 +4,8 @@ import com.dss.dto.DiscountScenarioDTO;
 import com.dss.dto.DssResultDTO;
 import com.dss.model.mongo.RetailData;
 import com.dss.repository.mongo.RetailDataRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -19,6 +21,7 @@ public class DiscountDssService {
         // Sử dụng một phương thức mới mà chúng ta sẽ thêm vào Repository
         return retailDataRepository.findFirstByStockCode(stockCode);
     }
+
     // Giả định chi phí = 60% giá bán
     private static final double COST_MARGIN = 0.6;
 
@@ -69,7 +72,7 @@ public class DiscountDssService {
             // Giả định: Cứ giảm 1% giá, doanh số tăng 1.5%
             double elasticityFactor = 1.5;
             double priceModifier = 1.0 - (discount / 100.0);
-            double quantityModifier = 1.0 + ( (discount / 100.0) * elasticityFactor );
+            double quantityModifier = 1.0 + ((discount / 100.0) * elasticityFactor);
 
             double simulatedPrice = avgPrice * priceModifier;
             double simulatedQuantity = totalBaseQuantity * quantityModifier;
@@ -114,5 +117,14 @@ public class DiscountDssService {
         return result;
     }
 
-
+    //    Lấy dữ liệu thô từ MongoDB, hỗ trợ Tìm kiếm theo StockCode
+    public Page<RetailData> getMongoDataPaginated(String keyword, Pageable pageable) {
+        if (keyword != null && !keyword.isEmpty()) {
+            // (A) Sửa: Gọi hàm tìm kiếm theo StockCode
+            return retailDataRepository.findByStockCodeContainingIgnoreCase(keyword, pageable);
+        } else {
+            // (B) Nếu không, gọi hàm findAll (phân trang)
+            return retailDataRepository.findAll(pageable);
+        }
+    }
 }

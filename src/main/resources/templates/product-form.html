@@ -48,31 +48,43 @@
         <div class="form-grid">
 
             <div class="form-group">
+                <label for="id">Stock Code (ID)</label>
+
+                <input type="text" th:if="${product.id != null}" th:field="*{id}" readonly style="background-color: #eee;">
+                <input type="text" th:if="${product.id == null}" th:field="*{id}" placeholder="Ví dụ: P-011 hoặc 85123A" required>
+                <span style="color: red;" th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></span>
+            </div>
+
+            <div class="form-group">
                 <label for="name">Product Name</label>
                 <input type="text" id="name" th:field="*{name}" placeholder="Enter product name" required>
+                <span style="color: red;" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
             </div>
 
             <div class="form-group">
                 <label for="category">Category</label>
                 <input type="text" id="category" th:field="*{category}" placeholder="Enter category">
+                <span style="color: red;" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></span>
             </div>
 
             <div class="form-group">
                 <label for="price">Price</label>
-                <input type="text"
-                       inputmode="numeric"
+                <input type="number"
                        id="price"
-                       name="price"
-                       th:value="${product.price != null ? #numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT') : ''}"
+                       th:field="*{price}"
+                       step="any"
                        placeholder="Enter price"
                        required>
+                <span style="color: red;" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
+
             </div>
 
             <div class="form-group">
                 <label for="stockQuantity">Stock Quantity</label>
                 <input type="number" id="stockQuantity" th:field="*{stockQuantity}" placeholder="Enter stock quantity" required>
-            </div>
+                <span style="color: red;" th:if="${#fields.hasErrors('stockQuantity')}" th:errors="*{stockQuantity}"></span>
 
+            </div>
         </div>
 
         <div class="form-actions">

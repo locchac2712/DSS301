@@ -3,170 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Dashboard</title>
+    <title>Product List (Master Data)</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --color-primary: #007bff;
+            --color-bg: #F5F5F5;
+            --color-white: #FFFFFF;
+            --color-primary: #5932EA; /* Màu tím/xanh chính */
             --color-danger: #dc3545;
             --color-success: #198754;
             --color-light-grey: #f9fbfd;
             --color-grey: #a0a0a0;
-            --color-dark-grey: #838383;
-            --color-dark: #292929;
-            --color-border: #eee;
-            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            --border-radius: 12px;
+            --color-text: #2a2a2a;
+            --color-text-secondary: #9197B3;
+            --color-border: #EEEEEE;
+            --border-radius-card: 14px;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--color-light-grey); color: var(--color-dark); margin: 0; padding: 2rem; }
-        a { text-decoration: none; color: var(--color-primary); }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .page-header h1 { font-size: 1.8rem; font-weight: 600; }
-        .search-bar { position: relative; }
-        .search-bar input { padding: 0.6rem 1rem 0.6rem 2.5rem; border: 1px solid var(--color-border); border-radius: 8px; background-color: #fff; box-shadow: var(--box-shadow); }
-        /* (Bỏ qua phần CSS thẻ tóm tắt vì không dùng trong trang này) */
 
-        /* Bảng Dữ liệu */
-        .table-container { background-color: #fff; border-radius: var(--border-radius); box-shadow: var(--box-shadow); padding: 2rem; border: 1px solid var(--color-border); }
+        /* (2) CSS CHO BỐ CỤC (LAYOUT) */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            display: flex; /* Bố cục Flexbox */
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--color-white);
+            height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: fixed; /* Giữ sidebar cố định */
+            z-index: 10;
+        }
+        .sidebar-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; }
+        .sidebar-header .logo { width: 40px; height: 40px; background-color: var(--color-primary); border-radius: 50%; }
+        .sidebar-header h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
+        .sidebar nav { flex-grow: 1; }
+        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
+        .sidebar-menu li { margin-bottom: 1rem; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; color: var(--color-text-secondary); transition: background-color 0.3s, color 0.3s; }
+        .sidebar-menu a.active,
+        .sidebar-menu a:hover { background-color: var(--color-primary); color: var(--color-white); }
+
+        /* (3) CSS CHO NỘI DUNG CHÍNH */
+        .main-content {
+            flex-grow: 1;
+            margin-left: 250px; /* Bằng chiều rộng sidebar */
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .container h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        /* (4) CSS CHO BẢNG DỮ LIỆU (TỪ CODE CỦA BẠN) */
+        .table-container {
+            background-color: #fff;
+            border-radius: var(--border-radius-card);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+        }
         .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .table-header h2 { font-size: 1.4rem; font-weight: 600; margin: 0; }
         .table-controls { display: flex; gap: 1rem; }
-        .add-new-btn { background-color: var(--color-primary); color: #fff; padding: 0.6rem 1rem; border-radius: 8px; font-weight: 500; transition: background-color 0.3s; }
+
+        .search-bar input {
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .add-new-btn { background-color: var(--color-primary); color: #fff; padding: 0.8rem 1rem; border-radius: 8px; font-weight: 500; transition: background-color 0.3s; line-height: 1.5; }
         .add-new-btn:hover { background-color: #0056b3; }
 
-        /* Kiểu dáng Bảng */
         table.data-table { width: 100%; border-collapse: collapse; }
         table.data-table th, table.data-table td { padding: 1rem 0.5rem; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: middle; }
         table.data-table th { color: var(--color-grey); font-weight: 500; font-size: 0.8rem; text-transform: uppercase; }
         table.data-table td { color: var(--color-dark); font-weight: 500; }
-        table.data-table td.price { color: var(--color-success); }
+        table.data-table td.price { color: var(--color-success); font-weight: 600; }
 
-        /* Nút Thao tác (Sửa/Xóa) */
-        .action-btn { padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 500; margin-right: 0.5rem; }
+        .action-btn { padding: 0.4rem 0.8rem; border-radius: 6px; font-weight: 500; margin-right: 0.5rem; text-decoration: none; display: inline-block; }
         .action-btn.edit { background-color: #e0e7ff; color: #3730a3; }
         .delete-form { display: inline; }
         .action-btn.delete { background-color: #ffe4e6; color: #be123c; border: none; font-family: 'Poppins', sans-serif; font-size: 0.875rem; cursor: pointer; }
 
-        /* Phân trang (Pagination) */
-        .pagination {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1.5rem;
-        }
-        .pagination-info { color: var(--color-dark-grey); font-size: 0.9rem; }
+        /* (5) CSS CHO PHÂN TRANG (PAGINATION) */
+        .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
+        .pagination-info { color: var(--color-text-secondary); font-size: 0.9rem; }
         .pagination-controls { display: flex; gap: 0.25rem; }
-        .pagination-controls a {
-            color: var(--color-dark-grey);
-            padding: 0.5rem 0.8rem;
-            border-radius: 6px;
-            transition: background-color 0.3s;
-            border: 1px solid var(--color-border);
-            font-size: 0.9rem;
-        }
-        .pagination-controls a.active,
-        .pagination-controls a:hover {
-            background-color: var(--color-primary);
-            color: #fff;
-            border-color: var(--color-primary);
-        }
-        .pagination-controls a.disabled {
-            color: var(--color-border);
-            pointer-events: none;
-        }
+        .pagination-controls a { color: var(--color-text-secondary); padding: 0.5rem 0.8rem; border-radius: 6px; transition: background-color 0.3s; border: 1px solid var(--color-border); font-size: 0.9rem; text-decoration: none; }
+        .pagination-controls a.active, .pagination-controls a:hover { background-color: var(--color-primary); color: #fff; border-color: var(--color-primary); }
+        .pagination-controls a.disabled { color: var(--color-border); pointer-events: none; background-color: #fafafa; }
     </style>
 </head>
 <body>
 
-<div class="container">
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo"></div>
+        <h2>DSS</h2>
+    </div>
+    <nav>
+        <ul class="sidebar-menu">
+            <li><a th:href="@{/dashboard}"><span>Overview</span></a></li>
+            <li><a th:href="@{/dss/discount}"><span>DSS Giảm giá</span></a></li>
+            <li><a th:href="@{/products/list}" class="active"><span>Products (Postgre)</span></a></li>
+<!--            <li><a href="#"><span>Orders</span></a></li>-->
+<!--            <li><a href="#"><span>Customers</span></a></li>-->
+            <li><a th:href="@{/mongo/list}"><b>Mongo Data Product</b></a></li>
+        </ul>
+    </nav>
+</aside>
 
-    <header class="page-header">
-        <h1>Product Dashboard</h1>
-    </header>
+<main class="main-content">
+    <div class="container">
 
-    <main class="table-container">
-        <header class="table-header">
-            <h2>All Products</h2>
-
-            <div class="table-controls">
-                <form th:action="@{/products/list}" method="get" class="search-bar">
-                    <input type.text name="keyword" th:value="${keyword}" placeholder="Search by name...">
-                </form>
-
-                <a th:href="@{/products/new}" class="add-new-btn">Add New Product</a>
-            </div>
+        <header class="page-header">
+            <h1>Product Master Data (PostgreSQL)</h1>
         </header>
 
-        <table class="data-table">
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Product Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock Qty</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="product : ${productPage.content}">
-                <td th:text="${product.id}">1</td>
-                <td th:text="${product.name}">iPhone 15 Pro</td>
-                <td th:text="${product.category}">Electronics</td>
-                <td th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}" class="price">$999.99</td>
-                <td th:text="${product.stockQuantity}">25</td>
-                <td>
-                    <a th:href="@{/products/edit/{id}(id=${product.id})}" class="action-btn edit">Edit</a>
-                    <form th:action="@{/products/delete/{id}(id=${product.id})}"
-                          method="post" class="delete-form"
-                          onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm ID ' + [[${product.id}]] + ' không?');">
-                        <button type="submit" class="action-btn delete">Delete</button>
+        <main class="table-container">
+            <header class="table-header">
+                <h2>All Products</h2>
+
+                <div class="table-controls">
+                    <form th:action="@{/products/list}" method="get" class="search-bar">
+                        <input type="text" name="keyword" th:value="${keyword}" placeholder="Search by name...">
                     </form>
-                </td>
-            </tr>
 
-            <tr th:if="${productPage.empty}">
-                <td colspan="6" style="text-align: center; color: var(--color-grey); padding: 2rem;">
-                    No products found.
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                    <a th:href="@{/products/new}" class="add-new-btn">Add New Product</a>
+                </div>
+            </header>
 
-        <footer class="pagination" th:if="${productPage.totalPages > 1}">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>ID (Stock Code)</th>
+                    <th>Product Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Stock Qty</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="product : ${productPage.content}">
+                    <td th:text="${product.id}">1</td>
+                    <td th:text="${product.name}">iPhone 15 Pro</td>
+                    <td th:text="${product.category}">Electronics</td>
+                    <td class="price" th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">$999.99</td>
+                    <td th:text="${product.stockQuantity}">25</td>
+                    <td>
+                        <a th:href="@{/products/edit/{id}(id=${product.id})}" class="action-btn edit">Edit</a>
+                        <form th:action="@{/products/delete/{id}(id=${product.id})}"
+                              method="post" class="delete-form"
+                              onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm ID ' + [[${product.id}]] + ' không?');">
+                            <button type="submit" class="action-btn delete">Delete</button>
+                        </form>
+                    </td>
+                </tr>
 
-            <div class="pagination-info">
-                Showing
-                <span th:text="${productPage.number * productPage.size + 1}">1</span>
-                to
-                <span th:text="${productPage.number * productPage.size + productPage.numberOfElements}">5</span>
-                of
-                <span th:text="${productPage.totalElements}">10</span>
-                entries
-            </div>
+                <tr th:if="${productPage.empty}">
+                    <td colspan="6" style="text-align: center; color: var(--color-grey); padding: 2rem;">
+                        No products found.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
 
-            <div class="pagination-controls">
-                <a th:href="@{/products/list(page=${productPage.number}, size=${productPage.size}, keyword=${keyword})}"
-                   th:classappend="${productPage.first ? 'disabled' : ''}">
-                    &laquo; Prev
-                </a>
+            <footer class="pagination" th:if="${productPage.totalPages > 1}">
+                <div class="pagination-info">
+                    Showing
+                    <span th:text="${productPage.number * productPage.size + 1}">1</span>
+                    to
+                    <span th:text="${productPage.number * productPage.size + productPage.numberOfElements}">5</span>
+                    of
+                    <span th:text="${productPage.totalElements}">10</span>
+                    entries
+                </div>
 
-                <a th:each="pageNum : ${pageNumbers}"
-                   th:href="@{/products/list(page=${pageNum}, size=${productPage.size}, keyword=${keyword})}"
-                   th:text="${pageNum}"
-                   th:classappend="${pageNum == productPage.number + 1 ? 'active' : ''}">
-                </a>
-
-                <a th:href="@{/products/list(page=${productPage.number + 2}, size=${productPage.size}, keyword=${keyword})}"
-                   th:classappend="${productPage.last ? 'disabled' : ''}">
-                    Next &raquo;
-                </a>
-            </div>
-        </footer>
-    </main>
-</div>
-
-</body>
+                <div class="pagination-controls">
+                    <a th:href="@{/products/list(page=${productPage.number}, size=${productPage.size}, keyword=${keyword})}"
+                       th:classappend="${productPage.first ? 'disabled' : ''}">
+                        &laquo; Prev
+                    </a>
+                    <a th:each="pageNum : ${pageNumbers}"
+                       th:href="@{/products/list(page=${pageNum}, size=${productPage.size}, keyword=${keyword})}"
+                       th:text="${pageNum}"
+                       th:classappend="${pageNum == productPage.number + 1 ? 'active' : ''}">
+                    </a>
+                    <a th:href="@{/products/list(page=${productPage.number + 2}, size=${productPage.size}, keyword=${keyword})}"
+                       th:classappend="${productPage.last ? 'disabled' : ''}">
+                        Next &raquo;
+                    </a>
+                </div>
+            </footer>
+        </main>
+    </div>
+</main> </body>
 </html>
