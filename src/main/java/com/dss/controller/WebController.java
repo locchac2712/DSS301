@@ -63,7 +63,7 @@ public class WebController {
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "5") int size) {
 
-        // (1) Xử lý Pageable (Spring data page bắt đầu từ 0)
+        // (1) Xử lý Pageable
         Pageable pageable = PageRequest.of(
                 page - 1,
                 size,
@@ -76,7 +76,7 @@ public class WebController {
         // (3) Thêm Page object vào Model
         model.addAttribute("productPage", productPage);
 
-        // (4) Thêm từ khóa tìm kiếm vào Model (để giữ lại trên thanh search)
+        // (4) Thêm từ khóa tìm kiếm vào Model
         model.addAttribute("keyword", keyword);
 
         // (5) Tạo danh sách các số trang để hiển thị trên UI
