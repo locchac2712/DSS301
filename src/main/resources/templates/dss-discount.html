@@ -119,17 +119,26 @@
             <li><a th:href="@{/dashboard}">
                 <span>Overview</span>
             </a></li>
-
-            <li><a th:href="@{/dss/discount}" class="active"> <span>DSS Giảm giá</span>
+            <li><a th:href="@{/dss/discount}" class="active">
+                <span>DSS Giảm giá</span>
             </a></li>
-
             <li><a th:href="@{/products/list}">
-                <span>Products</span>
+                <span>Products (Master)</span>
             </a></li>
-            <li><a href="#">
-                <span>Orders</span>
+<!--            <li><a href="#">-->
+<!--                <span>Orders</span>-->
+<!--            </a></li>-->
+<!--            <li><a href="#">-->
+<!--                <span>Customers</span>-->
+<!--            </a></li>-->
+            <li><a th:href="@{/mongo/list}">
+                <b>(Mongo Data)</b>
             </a></li>
-            <li><a href="#"> <span>Customers</span>
+
+            <hr style="margin: 1rem 0; border: 0; border-top: 1px solid #eee;">
+
+            <li><a th:href="@{/logout}" style="color: #D0004B !important;">
+                <strong>Logout</strong>
             </a></li>
         </ul>
     </nav>
