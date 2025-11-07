@@ -1,157 +1,212 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${product.id != null ? 'Edit Product' : 'Add Product'}">Product Form</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --color-bg: #F5F5F5;
-            --color-white: #FFFFFF;
-            --color-primary: #5932EA;
-            --color-text: #2a2a2a;
-            --color-text-secondary: #9197B3;
-            --color-border: #EEEEEE;
-            --color-danger-text: #D0004B;
-            --border-radius-card: 14px;
-            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--color-bg); color: var(--color-text); margin: 0; display: flex; }
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout}"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title th:text="${product.id != null ? 'Edit Product' : 'Add Product'}">
+      Product Form
+    </title>
 
-        /* (CSS Sidebar) */
-        .sidebar { width: 250px; background-color: var(--color-white); height: 100vh; padding: 2rem; box-sizing: border-box; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; z-index: 10; }
-        .sidebar-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; }
-        .sidebar-header .logo { width: 40px; height: 40px; background-color: var(--color-primary); border-radius: 50%; }
-        .sidebar-header h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
-        .sidebar nav { flex-grow: 1; }
-        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
-        .sidebar-menu li { margin-bottom: 1rem; }
-        .sidebar-menu a { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; color: var(--color-text-secondary); transition: background-color 0.3s, color 0.3s; }
-        .sidebar-menu a.active, .sidebar-menu a:hover { background-color: var(--color-primary); color: var(--color-white); }
-
-        /* (CSS cho Nội dung Form) */
-        .main-content {
-            flex-grow: 1;
-            margin-left: 250px; /* Bằng chiều rộng sidebar */
-            padding: 2rem;
-        }
-        .form-container {
-            max-width: 900px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 2.5rem;
-            border-radius: var(--border-radius-card);
-            box-shadow: var(--box-shadow);
-        }
-        .form-header h1 { font-size: 1.8rem; font-weight: 600; margin: 0 0 0.5rem 0; }
-        .form-header p { font-size: 0.9rem; color: var(--color-text-secondary); margin: 0 0 2rem 0; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem 2rem; margin-bottom: 1.5rem; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group label { font-size: 0.9rem; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 0.5rem; }
-
-        .form-group input[type="text"],
-        .form-group input[type="number"] {
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.9rem;
-            padding: 0.9rem 1.2rem;
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            background-color: var(--color-bg);
-        }
-        .form-group input[readonly] { background-color: #eee; }
-
-        /* (CSS cho Thông báo Lỗi Validation) */
-        .error-message {
-            color: var(--color-danger-text);
-            font-size: 0.8rem;
-            margin-top: 0.25rem;
+    <th:block layout:fragment="additional-css">
+      <style>
+        .product-form-wrapper {
+          max-width: 900px;
+          margin: 2rem auto 3rem;
+          padding: 0 1.5rem;
         }
 
-        /* (CSS Nút Bấm) */
-        .form-actions { display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem; }
-        .btn { font-family: 'Poppins', sans-serif; padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: opacity 0.3s; text-decoration: none; }
-        .btn:hover { opacity: 0.85; }
-        .btn-primary { background-color: var(--color-primary); color: #fff; }
-        .btn-secondary { background-color: var(--color-border); color: var(--color-text-secondary); }
-    </style>
-</head>
-<body>
+        .product-form-card {
+          background-color: var(--color-white);
+          border: 1px solid var(--color-border);
+          border-radius: var(--border-radius-card);
+          box-shadow: var(--box-shadow);
+          padding: 2rem 2.5rem;
+        }
 
-<aside class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo"></div>
-        <h2>DSS</h2>
-    </div>
-    <nav>
-        <ul class="sidebar-menu">
-            <li><a th:href="@{/dashboard}"><span>Overview</span></a></li>
-            <li><a th:href="@{/dss/discount}"><span>DSS Giảm giá</span></a></li>
-            <li><a th:href="@{/products/list}" class="active"><span>Products (Master)</span></a></li>
-<!--            <li><a href="#"><span>Orders</span></a></li>-->
-<!--            <li><a href="#"><span>Customers</span></a></li>-->
-            <li><a th:href="@{/mongo/list}"><b>(Mongo Data)</b></a></li>
-        </ul>
-    </nav>
-</aside>
+        .product-form-header h1 {
+          font-size: 2rem;
+          font-weight: 600;
+          margin-bottom: 0.75rem;
+        }
 
-<main class="main-content">
-    <div class="form-container">
+        .product-form-header p {
+          color: var(--color-text-secondary);
+          margin-bottom: 1.75rem;
+        }
 
-        <form th:action="@{/products/save}" th:object="${product}" method="post">
+        .product-form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          gap: 1.5rem 2rem;
+        }
 
-            <div class="form-header">
-                <h1 th:text="${product.id != null ? 'Edit Product Details' : 'Add New Product'}">Product Details</h1>
-                <p>Enter key product information and details</p>
+        .product-form-group label {
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: var(--color-text-secondary);
+          margin-bottom: 0.5rem;
+          display: block;
+        }
+
+        .product-form-group input {
+          width: 100%;
+          padding: 0.9rem 1.1rem;
+          border: 1px solid var(--color-border);
+          border-radius: var(--border-radius);
+          font-family: var(--font-family);
+          font-size: 0.95rem;
+          background-color: var(--color-bg);
+        }
+
+        .product-form-group input[readonly] {
+          background-color: #eeeeee;
+          cursor: not-allowed;
+        }
+
+        .product-error {
+          color: var(--color-red);
+          font-size: 0.8rem;
+          margin-top: 0.35rem;
+        }
+
+        .product-form-actions {
+          margin-top: 2.5rem;
+          display: flex;
+          justify-content: flex-end;
+          gap: 1rem;
+          flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+          .product-form-card {
+            padding: 1.75rem 1.5rem;
+          }
+        }
+      </style>
+    </th:block>
+  </head>
+  <body>
+    <section layout:fragment="content">
+      <div class="product-form-wrapper">
+        <div class="product-form-card">
+          <form
+            th:action="@{/products/save}"
+            th:object="${product}"
+            method="post"
+          >
+            <div class="product-form-header">
+              <h1
+                th:text="${product.id != null ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}"
+              >
+                Thông tin sản phẩm
+              </h1>
+              <p>
+                Nhập đầy đủ thông tin sản phẩm gồm mã hàng, mô tả, danh mục, giá
+                và số lượng tồn kho.
+              </p>
             </div>
 
-            <div class="form-grid">
+            <div class="product-form-grid">
+              <div class="product-form-group">
+                <label for="id">Stock Code (ID)</label>
+                <input
+                  type="text"
+                  id="id"
+                  th:field="*{id}"
+                  th:readonly="${product.id != null}"
+                  th:placeholder="${product.id == null} ? 'Ví dụ: P-011 (bắt buộc)' : ''"
+                  required
+                />
+                <span
+                  class="product-error"
+                  th:if="${#fields.hasErrors('id')}"
+                  th:errors="*{id}"
+                ></span>
+              </div>
 
-                <div class="form-group">
-                    <label for="id">Stock Code (ID)</label>
-                    <input type="text"
-                           th:field="*{id}"
-                           th:readonly="${product.id != null}"
-                           th:placeholder="${product.id == null} ? 'Ví dụ: P-011 (Bắt buộc)' : ''"
-                           th:style="${product.id != null} ? 'background-color: #eee;' : ''"
-                           required />
-                    <span class="error-message" th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></span>
-                </div>
+              <div class="product-form-group">
+                <label for="name">Tên sản phẩm</label>
+                <input
+                  type="text"
+                  id="name"
+                  th:field="*{name}"
+                  placeholder="Nhập tên sản phẩm"
+                  required
+                />
+                <span
+                  class="product-error"
+                  th:if="${#fields.hasErrors('name')}"
+                  th:errors="*{name}"
+                ></span>
+              </div>
 
-                <div class="form-group"></div>
+              <div class="product-form-group">
+                <label for="category">Danh mục</label>
+                <input
+                  type="text"
+                  id="category"
+                  th:field="*{category}"
+                  placeholder="Nhập danh mục"
+                  required
+                />
+                <span
+                  class="product-error"
+                  th:if="${#fields.hasErrors('category')}"
+                  th:errors="*{category}"
+                ></span>
+              </div>
 
-                <div class="form-group">
-                    <label for="name">Product Name (Description)</label>
-                    <input type="text" id="name" th:field="*{name}" placeholder="Enter product name" required>
-                    <span class="error-message" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
-                </div>
+              <div class="product-form-group">
+                <label for="price">Giá bán</label>
+                <input
+                  type="number"
+                  id="price"
+                  th:field="*{price}"
+                  step="any"
+                  placeholder="Ví dụ: 99.99"
+                  required
+                />
+                <span
+                  class="product-error"
+                  th:if="${#fields.hasErrors('price')}"
+                  th:errors="*{price}"
+                ></span>
+              </div>
 
-                <div class="form-group">
-                    <label for="category">Category</label>
-                    <input type="text" id="category" th:field="*{category}" placeholder="Enter category" required>
-                    <span class="error-message" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="price">Price</label>
-                    <input type="number" id="price" th:field="*{price}" step="any" placeholder="Enter price (e.g., 9.99)" required>
-                    <span class="error-message" th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
-                </div>
-
-                <div class="form-group">
-                    <label for="stockQuantity">Stock Quantity</label>
-                    <input type="number" id="stockQuantity" th:field="*{stockQuantity}" placeholder="Enter stock quantity (e.g., 100)" required>
-                    <span class="error-message" th:if="${#fields.hasErrors('stockQuantity')}" th:errors="*{stockQuantity}"></span>
-                </div>
-
+              <div class="product-form-group">
+                <label for="stockQuantity">Tồn kho</label>
+                <input
+                  type="number"
+                  id="stockQuantity"
+                  th:field="*{stockQuantity}"
+                  placeholder="Ví dụ: 150"
+                  required
+                />
+                <span
+                  class="product-error"
+                  th:if="${#fields.hasErrors('stockQuantity')}"
+                  th:errors="*{stockQuantity}"
+                ></span>
+              </div>
             </div>
 
-            <div class="form-actions">
-                <a th:href="@{/products/list}" class="btn btn-secondary">Cancel</a>
-                <button type="submit" class="btn btn-primary">Save Product</button>
+            <div class="product-form-actions">
+              <a th:href="@{/products/list}" class="btn btn-secondary">Hủy</a>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i>
+                <span
+                  th:text="${product.id != null ? 'Cập nhật' : 'Lưu sản phẩm'}"
+                  >Lưu sản phẩm</span
+                >
+              </button>
             </div>
-
-        </form>
-    </div>
-</main> </body>
+          </form>
+        </div>
+      </div>
+    </section>
+  </body>
 </html>

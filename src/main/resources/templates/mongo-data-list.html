@@ -1,168 +1,245 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout}"
+>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Mongo Data Viewer</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <th:block layout:fragment="additional-css">
     <style>
-        :root {
-            --color-bg: #F5F5F5;
-            --color-white: #FFFFFF;
-            --color-primary: #5932EA;
-            --color-text: #2a2a2a;
-            --color-text-secondary: #9197B3;
-            --color-border: #EEEEEE;
-            --color-success: #00B087;
-            --border-radius-card: 14px;
-            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        .mongo-wrapper {
+          max-width: 1100px;
+          margin: 2rem auto 3rem;
+          padding: 0 1.5rem;
         }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--color-bg); color: var(--color-text); margin: 0; display: flex; }
 
-        /* (CSS Sidebar) */
-        .sidebar { width: 250px; background-color: var(--color-white); height: 100vh; padding: 2rem; box-sizing: border-box; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; }
-        .sidebar-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2.5rem; }
-        .sidebar-header .logo { width: 40px; height: 40px; background-color: var(--color-primary); border-radius: 50%; }
-        .sidebar-header h2 { margin: 0; font-size: 1.5rem; font-weight: 600; }
-        .sidebar nav { flex-grow: 1; }
-        .sidebar-menu { list-style: none; padding: 0; margin: 0; }
-        .sidebar-menu li { margin-bottom: 1rem; }
-        .sidebar-menu a { display: flex; align-items: center; gap: 1rem; padding: 0.8rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500; color: var(--color-text-secondary); transition: background-color 0.3s, color 0.3s; }
-        .sidebar-menu a.active, .sidebar-menu a:hover { background-color: var(--color-primary); color: var(--color-white); }
+        .mongo-header {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          margin-bottom: 1.5rem;
+        }
 
-        /* (CSS cho Nội dung) */
-        .main-content {
-            flex-grow: 1;
-            margin-left: 250px; /* Bằng chiều rộng sidebar */
+        .mongo-header h1 {
+          font-size: 2rem;
+          font-weight: 600;
+        }
+
+        .mongo-header p {
+          color: var(--color-text-secondary);
+          margin-bottom: 0;
+        }
+
+        .mongo-card {
+          background-color: var(--color-white);
+          border: 1px solid var(--color-border);
+          border-radius: var(--border-radius-card);
+          box-shadow: var(--box-shadow);
+          padding: 1.75rem 2rem;
+        }
+
+        .mongo-card header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1.5rem;
+        }
+
+        .mongo-search {
+          display: flex;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+
+        .mongo-search input {
+          padding: 0.75rem 1rem;
+          border: 1px solid var(--color-border);
+          border-radius: var(--border-radius);
+          font-family: var(--font-family);
+          font-size: 0.95rem;
+          min-width: 260px;
+        }
+
+        .mongo-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        .mongo-table th,
+        .mongo-table td {
+          padding: 0.9rem 0.6rem;
+          border-bottom: 1px solid var(--color-border);
+          text-align: left;
+          font-weight: 500;
+        }
+
+        .mongo-table th {
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          color: var(--color-text-secondary);
+        }
+
+        .mongo-table td {
+          color: var(--color-text);
+        }
+
+        .mongo-table td.price {
+          color: var(--color-success);
+          font-weight: 600;
+        }
+
+        .mongo-empty {
+          text-align: center;
+          color: var(--color-text-secondary);
             padding: 2rem;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .container h1 { font-size: 1.8rem; font-weight: 600; margin-bottom: 2rem; }
-        .table-container { background-color: #fff; border-radius: var(--border-radius-card); box-shadow: var(--box-shadow); padding: 2rem; border: 1px solid var(--color-border); }
 
-        /* (CSS Form Search) */
-        .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .search-form { display: flex; gap: 1rem; }
-        .search-form input {
-            width: 300px;
-            padding: 0.8rem 1rem;
-            border: 1px solid var(--color-border);
-            border-radius: 8px;
-            font-family: 'Poppins', sans-serif;
+        .mongo-pagination {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-top: 1.5rem;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+        }
+
+        .mongo-pagination-info {
+          color: var(--color-text-secondary);
             font-size: 0.9rem;
         }
-        .search-form button {
-            background-color: var(--color-primary);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 0 1.5rem;
-            cursor: pointer;
-            font-weight: 500;
+
+        .mongo-pagination-controls {
+          display: flex;
+          gap: 0.35rem;
+          flex-wrap: wrap;
         }
 
-        /* (CSS Bảng) */
-        .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th, .data-table td { padding: 1rem 0.5rem; border-bottom: 1px solid var(--color-border); text-align: left; vertical-align: middle; }
-        .data-table th { color: var(--color-text-secondary); font-weight: 500; font-size: 0.8rem; text-transform: uppercase; }
-        .data-table td { color: var(--color-text); font-weight: 500; font-size: 0.9rem; }
-        .data-table td.price { color: var(--color-success); font-weight: 600; }
+        .mongo-pagination-controls a {
+          padding: 0.55rem 0.9rem;
+          border-radius: var(--border-radius);
+          border: 1px solid var(--color-border);
+          color: var(--color-text-secondary);
+          text-decoration: none;
+          font-size: 0.9rem;
+          transition: background-color 0.2s ease, color 0.2s ease,
+            border-color 0.2s ease;
+        }
 
-        /* (CSS Phân trang) */
-        .pagination { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
-        .pagination-info { color: var(--color-dark-grey); font-size: 0.9rem; }
-        .pagination-controls { display: flex; gap: 0.25rem; }
-        .pagination-controls a { color: var(--color-text-secondary); padding: 0.5rem 0.8rem; border-radius: 6px; transition: background-color 0.3s; border: 1px solid var(--color-border); font-size: 0.9rem; text-decoration: none; }
-        .pagination-controls a.active, .pagination-controls a:hover { background-color: var(--color-primary); color: #fff; border-color: var(--color-primary); }
-        .pagination-controls a.disabled { color: var(--color-border); pointer-events: none; background-color: #fafafa; }
+        .mongo-pagination-controls a.active,
+        .mongo-pagination-controls a:hover {
+            background-color: var(--color-primary);
+          color: var(--color-white);
+          border-color: var(--color-primary);
+        }
+
+        .mongo-pagination-controls a.disabled {
+          background-color: #f5f5f5;
+          color: var(--color-border);
+          cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+          .mongo-card {
+            padding: 1.5rem 1.25rem;
+          }
+        }
     </style>
+    </th:block>
 </head>
 <body>
-
-<aside class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo"></div>
-        <h2>DSS</h2>
+    <section layout:fragment="content">
+      <div class="mongo-wrapper">
+        <div class="mongo-header">
+          <h1>MongoDB Raw Data Viewer</h1>
+          <p>
+            Xem nhanh danh sách sản phẩm gốc lưu trong MongoDB để đối soát và
+            phân tích dữ liệu phi cấu trúc.
+          </p>
     </div>
-    <nav>
-        <ul class="sidebar-menu">
-            <li><a th:href="@{/dashboard}"><span>Overview</span></a></li>
-            <li><a th:href="@{/dss/discount}"><span>DSS Giảm giá</span></a></li>
-            <li><a th:href="@{/products/list}"><span>Products (Postgre)</span></a></li>
-<!--            <li><a href="#"><span>Orders</span></a></li>-->
-<!--            <li><a href="#"><span>Customers</span></a></li>-->
-            <li><a th:href="@{/mongo/list}" class="active"><span>Products (MongoDB)</span></a></li>
-        </ul>
-    </nav>
-</aside>
 
-<main class="main-content">
-    <div class="container">
-        <h1>MongoDB Raw Data Viewer</h1>
-
-        <div class="table-container">
-
-            <header class="table-header">
-                <form th:action="@{/mongo/list}" method="get" class="search-form">
-                    <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm theo Stock Code...">
-                    <button type="submit">Search</button>
+        <div class="mongo-card">
+          <header>
+            <form th:action="@{/mongo/list}" method="get" class="mongo-search">
+              <input
+                type="text"
+                name="keyword"
+                th:value="${keyword}"
+                placeholder="Tìm kiếm theo stock code hoặc mô tả..."
+              />
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Tìm kiếm
+              </button>
                 </form>
             </header>
 
-            <table class="data-table">
+          <table class="mongo-table">
                 <thead>
                 <tr>
                     <th>Stock Code</th>
-                    <th>Description</th>
-                    <th>Unit Price</th>
+                <th>Mô tả</th>
+                <th>Đơn giá</th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr th:each="item : ${dataPage.content}">
                     <td th:text="${item.stockCode}">22633</td>
                     <td th:text="${item.description}">HAND WARMER</td>
-                    <td class="price" th:text="'$' + ${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')}">$1.85</td>
+                <td
+                  class="price"
+                  th:text="'$' + ${#numbers.formatDecimal(item.unitPrice, 1, 'COMMA', 2, 'POINT')}"
+                >
+                  $1.85
+                </td>
                 </tr>
                 <tr th:if="${dataPage.empty}">
-                    <td colspan="3" style="text-align: center; color: var(--color-text-secondary); padding: 2rem;">
-                        No data found matching your criteria.
+                <td colspan="3" class="mongo-empty">
+                  Không có dữ liệu phù hợp với điều kiện tìm kiếm.
                     </td>
                 </tr>
                 </tbody>
             </table>
 
-            <footer class="pagination" th:if="${dataPage.totalPages > 1}">
-                <div class="pagination-info">
-                    Showing
+          <footer class="mongo-pagination" th:if="${dataPage.totalPages > 1}">
+            <div class="mongo-pagination-info">
+              Hiển thị
                     <span th:text="${dataPage.number * dataPage.size + 1}">1</span>
-                    to
-                    <span th:text="${dataPage.number * dataPage.size + dataPage.numberOfElements}">5</span>
-                    of
-                    <span th:text="${dataPage.totalElements}">541909</span>
-                    entries
+              đến
+              <span
+                th:text="${dataPage.number * dataPage.size + dataPage.numberOfElements}"
+              ></span>
+              trong tổng số
+              <span th:text="${dataPage.totalElements}">100</span>
+              bản ghi
                 </div>
 
-                <div class="pagination-controls">
-                    <a th:href="@{/mongo/list(page=${dataPage.number}, keyword=${keyword})}"
-                       th:classappend="${dataPage.first ? 'disabled' : ''}">
+            <div class="mongo-pagination-controls">
+              <a
+                th:href="@{/mongo/list(page=${dataPage.number}, keyword=${keyword})}"
+                th:classappend="${dataPage.first ? 'disabled' : ''}"
+              >
                         &laquo; Prev
                     </a>
-
-                    <a th:each="pageNum : ${pageNumbers}"
+              <a
+                th:each="pageNum : ${pageNumbers}"
                        th:href="@{/mongo/list(page=${pageNum}, keyword=${keyword})}"
                        th:text="${pageNum}"
-                       th:classappend="${pageNum == dataPage.number + 1 ? 'active' : ''}">
-                    </a>
-
-                    <a th:href="@{/mongo/list(page=${dataPage.number + 2}, keyword=${keyword})}"
-                       th:classappend="${dataPage.last ? 'disabled' : ''}">
+                th:classappend="${pageNum == dataPage.number + 1 ? 'active' : ''}"
+              ></a>
+              <a
+                th:href="@{/mongo/list(page=${dataPage.number + 2}, keyword=${keyword})}"
+                th:classappend="${dataPage.last ? 'disabled' : ''}"
+              >
                         Next &raquo;
                     </a>
                 </div>
             </footer>
         </div>
     </div>
-</main>
-
+    </section>
 </body>
 </html>

@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html
+  lang="vi"
+  xmlns:th="http://www.thymeleaf.org"
+  xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+  layout:decorate="~{layout}"
+>
+  <head>
+    <meta charset="UTF-8" />
+    <title>RFM Prediction</title>
+
+    <th:block layout:fragment="additional-css">
+      <style>
+        .rfm-wrapper {
+          max-width: 1200px;
+          margin: 2rem auto 3rem;
+          padding: 0 1.5rem;
+          display: flex;
+          flex-direction: column;
+          gap: 1.75rem;
+        }
+
+        .rfm-header h1 {
+          font-size: 2rem;
+          font-weight: 600;
+          margin-bottom: 0.75rem;
+        }
+
+        .rfm-header p {
+          color: var(--color-text-secondary);
+          margin-bottom: 0.25rem;
+        }
+
+        .rfm-card {
+          background-color: var(--color-white);
+          border: 1px solid var(--color-border);
+          border-radius: var(--border-radius-card);
+          box-shadow: var(--box-shadow);
+          padding: 1.75rem 2rem;
+        }
+
+        .rfm-card h2 {
+          font-size: 1.4rem;
+          font-weight: 600;
+          margin-bottom: 1.25rem;
+        }
+
+        .rfm-form-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 1.25rem 1.75rem;
+        }
+
+        .rfm-form-group {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .rfm-form-group label {
+          font-size: 0.9rem;
+          font-weight: 500;
+          color: var(--color-text-secondary);
+          margin-bottom: 0.5rem;
+        }
+
+        .rfm-form-group input,
+        .rfm-form-group select {
+          padding: 0.75rem 1rem;
+          border: 1px solid var(--color-border);
+          border-radius: var(--border-radius);
+          font-size: 0.95rem;
+          font-family: var(--font-family);
+          background-color: var(--color-bg);
+        }
+
+        .rfm-form-actions {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 1.5rem;
+        }
+
+        .rfm-results-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 1.5rem;
+        }
+
+        .rfm-products-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.85rem;
+          max-height: 320px;
+          overflow-y: auto;
+        }
+
+        .rfm-product-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0.9rem 1rem;
+          border: 1px solid var(--color-border);
+          border-radius: var(--border-radius);
+          background-color: var(--color-bg-light);
+        }
+
+        .rfm-product-name {
+          font-weight: 600;
+          margin-bottom: 0.2rem;
+        }
+
+        .rfm-product-code {
+          font-size: 0.85rem;
+          color: var(--color-text-secondary);
+        }
+
+        .rfm-score-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          gap: 1rem;
+        }
+
+        .rfm-score-card {
+          background-color: var(--color-bg-light);
+          border-radius: var(--border-radius);
+          padding: 1rem 1.25rem;
+          text-align: center;
+        }
+
+        .rfm-score-card .value {
+          font-size: 1.6rem;
+          font-weight: 600;
+          margin-top: 0.35rem;
+        }
+
+        .rfm-chart-card {
+          position: relative;
+          height: 420px;
+        }
+
+        .rfm-table {
+          width: 100%;
+          border-collapse: collapse;
+        }
+
+        .rfm-table th,
+        .rfm-table td {
+          padding: 0.9rem 0.6rem;
+          border-bottom: 1px solid var(--color-border);
+          text-align: left;
+          font-weight: 500;
+        }
+
+        .rfm-table th {
+          font-size: 0.8rem;
+          text-transform: uppercase;
+          color: var(--color-text-secondary);
+        }
+
+        .rfm-table td small {
+          display: block;
+          font-size: 0.8rem;
+          color: var(--color-text-secondary);
+        }
+
+        .rfm-empty-state {
+          text-align: center;
+          color: var(--color-text-secondary);
+          padding: 2rem 1rem;
+        }
+
+        .rfm-legend {
+          position: absolute;
+          top: 1rem;
+          right: 1rem;
+          background-color: rgba(255, 107, 107, 0.12);
+          color: var(--color-red);
+          padding: 0.45rem 0.9rem;
+          border-radius: var(--border-radius);
+          font-size: 0.85rem;
+        }
+
+        .rfm-date-note {
+          font-size: 0.85rem;
+          color: var(--color-text-secondary);
+        }
+
+        @media (max-width: 768px) {
+          .rfm-card {
+            padding: 1.5rem 1.25rem;
+          }
+        }
+      </style>
+    </th:block>
+  </head>
+  <body>
+    <section layout:fragment="content">
+      <div class="rfm-wrapper">
+        <div class="rfm-header">
+          <h1>Phân tích & dự báo RFM</h1>
+          <p>
+            Phân tích hành vi khách hàng theo RFM và dự báo xu hướng doanh thu
+            dựa trên dữ liệu giao dịch lịch sử.
+          </p>
+          <p class="rfm-date-note" th:if="${dateRange != null}">
+            Khoảng dữ liệu khả dụng:
+            <span th:text="${dateRange.minDate}">2023-01-01</span> &rarr;
+            <span th:text="${dateRange.maxDate}">2025-12-31</span>
+          </p>
+        </div>
+
+        <div
+          th:if="${error}"
+          class="alert alert-error"
+          th:text="${error}"
+        ></div>
+        <div
+          th:if="${success}"
+          class="alert alert-success"
+          th:text="${success}"
+        ></div>
+
+        <div class="rfm-card">
+          <h2>Thiết lập phân tích</h2>
+          <form th:action="@{/rfm/prediction}" method="post">
+            <div class="rfm-form-grid">
+              <div class="rfm-form-group">
+                <label for="startDate">Từ ngày</label>
+                <input
+                  type="date"
+                  id="startDate"
+                  name="startDate"
+                  th:value="${selectedStartDate}"
+                  th:attr="min=${dateRange != null ? dateRange.minDate : null}, max=${dateRange != null ? dateRange.maxDate : null}"
+                  required
+                />
+              </div>
+              <div class="rfm-form-group">
+                <label for="endDate">Đến ngày</label>
+                <input
+                  type="date"
+                  id="endDate"
+                  name="endDate"
+                  th:value="${selectedEndDate}"
+                  th:attr="min=${dateRange != null ? dateRange.minDate : null}, max=${dateRange != null ? dateRange.maxDate : null}"
+                  required
+                />
+              </div>
+              <div class="rfm-form-group">
+                <label for="selectedSegment">Nhóm khách hàng</label>
+                <select id="selectedSegment" name="selectedSegment" required>
+                  <option value="">-- Chọn --</option>
+                  <option
+                    th:each="segment : ${segments}"
+                    th:value="${segment}"
+                    th:text="${segment}"
+                  ></option>
+                </select>
+              </div>
+              <div class="rfm-form-group">
+                <label>Mô hình dự báo</label>
+                <div class="bg-light border rounded px-3 py-2 fw-semibold">
+                  Prophet
+                </div>
+                <input type="hidden" name="predictionModel" value="Prophet" />
+              </div>
+              <div class="rfm-form-group" style="grid-column: 1 / -1">
+                <label for="timePeriod">Khoảng thời gian biểu đồ</label>
+                <select id="timePeriod" name="timePeriod" required>
+                  <option
+                    value="MONTH"
+                    th:selected="${selectedTimePeriod == 'MONTH' or selectedTimePeriod == null}"
+                  >
+                    Tháng
+                  </option>
+                  <option
+                    value="QUARTER"
+                    th:selected="${selectedTimePeriod == 'QUARTER'}"
+                  >
+                    Quý
+                  </option>
+                  <option
+                    value="YEAR"
+                    th:selected="${selectedTimePeriod == 'YEAR'}"
+                  >
+                    Năm
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="rfm-form-actions">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-graph-up"></i> Dự báo xu hướng
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div
+          th:if="${rfmResult != null && rfmResult.selectedSegment != null}"
+          class="rfm-results"
+        >
+          <div class="rfm-results-grid">
+            <div class="rfm-card">
+              <h2>Sản phẩm tiềm năng</h2>
+              <div
+                th:if="${rfmResult.potentialProducts != null && !rfmResult.potentialProducts.isEmpty()}"
+                class="rfm-products-list"
+              >
+                <div
+                  th:each="product : ${rfmResult.potentialProducts}"
+                  class="rfm-product-item"
+                >
+                  <div>
+                    <div
+                      class="rfm-product-name"
+                      th:text="${product.description != null and !product.description.isEmpty() ? product.description : product.stockCode}"
+                    >
+                      Product name
+                    </div>
+                    <div
+                      class="rfm-product-code"
+                      th:text="${product.stockCode}"
+                    >
+                      P-000
+                    </div>
+                  </div>
+                  <div class="text-success fw-semibold">
+                    <span
+                      th:text="${#numbers.formatDecimal(product.potentialScore, 1, 'COMMA', 1, 'POINT')} + '%'"
+                    >
+                      83%
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <p
+                th:if="${rfmResult.potentialProducts == null || rfmResult.potentialProducts.isEmpty()}"
+                class="rfm-empty-state"
+              >
+                Không có sản phẩm tiềm năng nào được tìm thấy.
+              </p>
+            </div>
+
+            <div class="rfm-card">
+              <h2>Điểm RFM trung bình</h2>
+              <div class="rfm-score-grid">
+                <div class="rfm-score-card">
+                  <span class="text-secondary d-block">Recency</span>
+                  <div
+                    class="value text-primary"
+                    th:text="${#numbers.formatDecimal(rfmResult.avgRecencyScore, 1, 'COMMA', 1, 'POINT')}"
+                  >
+                    3.5
+                  </div>
+                </div>
+                <div class="rfm-score-card">
+                  <span class="text-secondary d-block">Frequency</span>
+                  <div
+                    class="value text-success"
+                    th:text="${#numbers.formatDecimal(rfmResult.avgFrequencyScore, 1, 'COMMA', 1, 'POINT')}"
+                  >
+                    4.1
+                  </div>
+                </div>
+                <div class="rfm-score-card">
+                  <span class="text-secondary d-block">Monetary</span>
+                  <div
+                    class="value text-warning"
+                    th:text="${#numbers.formatDecimal(rfmResult.avgMonetaryScore, 1, 'COMMA', 1, 'POINT')}"
+                  >
+                    2.9
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            class="rfm-card rfm-chart-card"
+            th:classappend="${rfmResult.trendData == null || rfmResult.trendData.isEmpty() ? ' d-none' : ''}"
+          >
+            <h2>Xu hướng mua hàng theo thời gian</h2>
+            <div class="position-relative" style="height: 340px">
+              <canvas id="trendChart"></canvas>
+              <div class="rfm-legend d-none" id="rfmPredictionLegend">
+                <span class="me-1">●</span> Dữ liệu dự báo
+              </div>
+            </div>
+          </div>
+
+          <div class="rfm-card">
+            <h2>Danh sách sản phẩm phổ biến</h2>
+            <table
+              class="rfm-table"
+              th:if="${rfmResult.popularProducts != null && !rfmResult.popularProducts.isEmpty()}"
+            >
+              <thead>
+                <tr>
+                  <th>Nhóm khách hàng</th>
+                  <th>Sản phẩm</th>
+                  <th>Số lượng</th>
+                  <th>Doanh thu</th>
+                  <th>Tỷ lệ</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr th:each="product : ${rfmResult.popularProducts}">
+                  <td th:text="${rfmResult.selectedSegment}">Champions</td>
+                  <td>
+                    <span
+                      th:text="${product.description != null && !product.description.isEmpty() ? product.description : product.stockCode}"
+                    ></span>
+                    <small th:text="${product.stockCode}">P-001</small>
+                  </td>
+                  <td
+                    th:text="${#numbers.formatInteger(product.purchaseCount, 0, 'COMMA')}"
+                  >
+                    125
+                  </td>
+                  <td>
+                    $<span
+                      th:text="${#numbers.formatDecimal(product.totalRevenue != null ? product.totalRevenue : product.avgPrice * product.purchaseCount, 1, 'COMMA', 0, 'POINT')}"
+                    >
+                      12,500
+                    </span>
+                  </td>
+                  <td
+                    class="text-success fw-semibold"
+                    th:text="${#numbers.formatDecimal(product.purchaseRate, 1, 'COMMA', 1, 'POINT')} + '%'"
+                  >
+                    32.5%
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p
+              th:if="${rfmResult.popularProducts == null || rfmResult.popularProducts.isEmpty()}"
+              class="rfm-empty-state"
+            >
+              Không có sản phẩm phổ biến nào được tìm thấy.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <th:block layout:fragment="additional-scripts">
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener("DOMContentLoaded", function () {
+          const rfmResult = /*[[${rfmResult}]]*/ null;
+          if (
+            !rfmResult ||
+            !rfmResult.trendData ||
+            rfmResult.trendData.length === 0
+          ) {
+            return;
+          }
+
+          const trendData = rfmResult.trendData;
+          const labels = trendData.map((d) => d.period);
+          const revenueData = trendData.map((d) => d.totalRevenue || 0);
+          const ordersData = trendData.map((d) => d.totalOrders || 0);
+          const isPredicted = trendData.map(
+            (d) => d.predictedRevenue != null && d.predictedRevenue > 0
+          );
+          const predictionStartIndex = isPredicted.indexOf(true);
+
+          const ctx = document.getElementById("trendChart");
+          if (!ctx) {
+            return;
+          }
+
+          new Chart(ctx.getContext("2d"), {
+            type: "line",
+            data: {
+              labels,
+              datasets: [
+                {
+                  label: "Doanh thu (Revenue)",
+                  data: revenueData,
+                  borderColor: "#5932EA",
+                  backgroundColor: "rgba(89, 50, 234, 0.1)",
+                  tension: 0.3,
+                  borderDash: (ctx) =>
+                    predictionStartIndex >= 0 &&
+                    ctx.dataIndex >= predictionStartIndex
+                      ? [5, 5]
+                      : [],
+                  pointRadius: (ctx) =>
+                    predictionStartIndex >= 0 &&
+                    ctx.dataIndex >= predictionStartIndex
+                      ? 6
+                      : 4,
+                  pointBackgroundColor: (ctx) =>
+                    predictionStartIndex >= 0 &&
+                    ctx.dataIndex >= predictionStartIndex
+                      ? "#FF6B6B"
+                      : "#5932EA",
+                },
+                {
+                  label: "Số đơn hàng",
+                  data: ordersData,
+                  borderColor: "#00B087",
+                  backgroundColor: "rgba(0, 176, 135, 0.1)",
+                  tension: 0.3,
+                  yAxisID: "y1",
+                },
+              ],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: "top",
+                },
+                tooltip: {
+                  mode: "index",
+                  intersect: false,
+                },
+              },
+              scales: {
+                y: {
+                  type: "linear",
+                  position: "left",
+                  title: {
+                    display: true,
+                    text: "Doanh thu ($)",
+                  },
+                },
+                y1: {
+                  type: "linear",
+                  position: "right",
+                  title: {
+                    display: true,
+                    text: "Số đơn hàng",
+                  },
+                  grid: {
+                    drawOnChartArea: false,
+                  },
+                },
+              },
+            },
+          });
+
+          if (predictionStartIndex >= 0) {
+            const legend = document.getElementById("rfmPredictionLegend");
+            if (legend) {
+              legend.classList.remove("d-none");
+            }
+          }
+        });
+        /*]]>*/
+      </script>
+    </th:block>
+  </body>
+</html>
+
