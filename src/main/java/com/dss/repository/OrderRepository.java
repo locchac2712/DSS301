@@ -1,9 +1,13 @@
 package com.dss.repository;
 
+import com.dss.dto.CategoryRevenueDTO;
 import com.dss.dto.DashboardKpiDTO;
+import com.dss.dto.TimeSeriesDataDTO;
 import com.dss.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, String> {
     /**
@@ -19,4 +23,11 @@ public interface OrderRepository extends JpaRepository<Order, String> {
             " COUNT(DISTINCT o.customer))" +
             " FROM Order o")
     DashboardKpiDTO getKpiData();
+
+    @Query("SELECT new com.dss.dto.TimeSeriesDataDTO(o.orderDate, SUM(o.totalAmount)) " +
+            "FROM Order o " +
+            "WHERE o.status = 'Completed' OR o.status = 'Shipped' " + // (Chỉ tính đơn hàng đã hoàn thành)
+            "GROUP BY o.orderDate " +
+            "ORDER BY o.orderDate ASC")
+    List<TimeSeriesDataDTO> getSalesRevenueOverTime();
 }

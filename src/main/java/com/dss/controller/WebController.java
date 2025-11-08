@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.List;
 import java.util.Optional;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 
 @Controller // Sử dụng @Controller để trả về tên template (HTML)
 public class WebController {
@@ -69,7 +71,7 @@ public class WebController {
             @RequestParam(name = "page", defaultValue = "1") int page,
             @RequestParam(name = "size", defaultValue = "5") int size) {
 
-        // (1) Xử lý Pageable (Spring data page bắt đầu từ 0)
+        // (1) Xử lý Pageable
         Pageable pageable = PageRequest.of(
                 page - 1,
                 size,
@@ -82,7 +84,7 @@ public class WebController {
         // (3) Thêm Page object vào Model
         model.addAttribute("productPage", productPage);
 
-        // (4) Thêm từ khóa tìm kiếm vào Model (để giữ lại trên thanh search)
+        // (4) Thêm từ khóa tìm kiếm vào Model
         model.addAttribute("keyword", keyword);
 
         // (5) Tạo danh sách các số trang để hiển thị trên UI
@@ -118,10 +120,14 @@ public class WebController {
 
     // 4. CREATE/UPDATE (Xử lý Lưu Form) - POST /products/save
     @PostMapping("/products/save")
-    public String saveProduct(@ModelAttribute Product product) {
-        // Nếu product.id có giá trị: UPDATE. Nếu product.id là null: CREATE
-        productService.save(product);
-        return "redirect:/products/list"; // Chuyển hướng về trang danh sách
+    public String saveProduct(@Valid @ModelAttribute Product product, BindingResult bindingResult, Model model) {
+//        Kiểm tra lỗi validation
+        if (bindingResult.hasErrors()){
+            return "product-form"; // Trả về lại form nếu có lỗi
+        } else {
+            productService.save(product);
+            return "redirect:/products/list"; // Chuyển hướng về trang danh sách
+        }
     }
 
     // 5. DELETE (Xử lý Xóa) - POST /products/delete/{id}
