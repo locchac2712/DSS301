@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-primary: #007bff;
+            --color-danger: #dc3545;
+            --color-success: #198754;
+            --color-warning: #ffc107;
+            --color-light-grey: #f9fbfd;
+            --color-grey: #a0a0a0;
+            --color-dark-grey: #838383;
+            --color-dark: #292929;
+            --color-border: #eee;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --border-radius: 12px;
+        }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--color-light-grey); 
+            color: var(--color-dark); 
+            margin: 0; 
+            padding: 2rem; 
+        }
+        a { text-decoration: none; color: var(--color-primary); }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Header */
+        .page-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 2rem; 
+        }
+        .page-header h1 { 
+            font-size: 1.8rem; 
+            font-weight: 600; 
+            margin: 0;
+        }
+        .breadcrumb {
+            color: var(--color-grey);
+            font-size: 0.9rem;
+        }
+        .breadcrumb a {
+            color: var(--color-primary);
+        }
+
+        /* Table Container */
+        .table-container { 
+            background-color: #fff; 
+            border-radius: var(--border-radius); 
+            box-shadow: var(--box-shadow); 
+            padding: 2rem; 
+            border: 1px solid var(--color-border); 
+        }
+        .table-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1.5rem; 
+        }
+        .table-header h2 { 
+            font-size: 1.4rem; 
+            font-weight: 600; 
+            margin: 0; 
+        }
+
+        /* Table Style */
+        table.data-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        table.data-table th, 
+        table.data-table td { 
+            padding: 1rem 0.5rem; 
+            border-bottom: 1px solid var(--color-border); 
+            text-align: left; 
+            vertical-align: middle; 
+        }
+        table.data-table th { 
+            color: var(--color-grey); 
+            font-weight: 500; 
+            font-size: 0.8rem; 
+            text-transform: uppercase; 
+        }
+        table.data-table td { 
+            color: var(--color-dark); 
+            font-weight: 500; 
+        }
+
+        /* Role Badge */
+        .role-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .role-badge.admin {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        .role-badge.user {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        .role-badge.manager {
+            background-color: #cfe2ff;
+            color: #084298;
+        }
+
+        /* Action Button */
+        .action-btn { 
+            padding: 0.5rem 1rem; 
+            border-radius: 6px; 
+            font-weight: 500; 
+            font-size: 0.85rem;
+            transition: opacity 0.3s;
+        }
+        .action-btn:hover {
+            opacity: 0.8;
+        }
+        .action-btn.view { 
+            background-color: #e0e7ff; 
+            color: #3730a3; 
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+        .pagination-info { 
+            color: var(--color-dark-grey); 
+            font-size: 0.9rem; 
+        }
+        .pagination-controls { 
+            display: flex; 
+            gap: 0.25rem; 
+        }
+        .pagination-controls a {
+            color: var(--color-dark-grey);
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+            border: 1px solid var(--color-border);
+            font-size: 0.9rem;
+        }
+        .pagination-controls a.active,
+        .pagination-controls a:hover {
+            background-color: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-primary);
+        }
+        .pagination-controls a.disabled {
+            color: var(--color-border);
+            pointer-events: none;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-grey);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header class="page-header">
+        <div>
+            <h1>👥 User Management</h1>
+            <p class="breadcrumb">
+                <a href="/">Home</a> / Users
+            </p>
+        </div>
+    </header>
+
+    <main class="table-container">
+        <header class="table-header">
+            <h2>All Users</h2>
+            <div style="color: var(--color-grey); font-size: 0.9rem;">
+                Total: <strong th:text="${userPage.totalElements}">0</strong> users
+            </div>
+        </header>
+
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>User ID</th>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${userPage.content}">
+                <td>
+                    <strong th:text="${user.id}">1</strong>
+                </td>
+                <td th:text="${user.username}">username</td>
+                <td>
+                    <span class="role-badge" 
+                          th:classappend="${user.role?.toLowerCase()}"
+                          th:text="${user.role}">User</span>
+                </td>
+                <td>
+                    <a th:href="@{/users/details/{id}(id=${user.id})}" class="action-btn view">
+                        View Details
+                    </a>
+                </td>
+            </tr>
+
+            <tr th:if="${userPage.empty}">
+                <td colspan="4" class="empty-state">
+                    <p>No users found.</p>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <footer class="pagination" th:if="${userPage.totalPages > 1}">
+
+            <div class="pagination-info">
+                Showing
+                <span th:text="${userPage.number * userPage.size + 1}">1</span>
+                to
+                <span th:text="${userPage.number * userPage.size + userPage.numberOfElements}">10</span>
+                of
+                <span th:text="${userPage.totalElements}">100</span>
+                entries
+            </div>
+
+            <div class="pagination-controls">
+                <a th:href="@{/users/list(page=${userPage.number}, size=${userPage.size})}"
+                   th:classappend="${userPage.first ? 'disabled' : ''}">
+                    &laquo; Prev
+                </a>
+
+                <a th:each="pageNum : ${pageNumbers}"
+                   th:href="@{/users/list(page=${pageNum}, size=${userPage.size})}"
+                   th:text="${pageNum}"
+                   th:classappend="${pageNum == userPage.number + 1 ? 'active' : ''}">
+                </a>
+
+                <a th:href="@{/users/list(page=${userPage.number + 2}, size=${userPage.size})}"
+                   th:classappend="${userPage.last ? 'disabled' : ''}">
+                    Next &raquo;
+                </a>
+            </div>
+        </footer>
+    </main>
+</div>
+
+</body>
+</html>
+

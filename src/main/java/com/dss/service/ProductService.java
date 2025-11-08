@@ -49,4 +49,28 @@ public class ProductService {
     public void delete(String id) {
         repo.deleteById(id);
     }
+
+    /**
+     * INVENTORY DASHBOARD - Thống kê
+     */
+    
+    // Đếm tổng số sản phẩm
+    public long getTotalProducts() {
+        return repo.count();
+    }
+
+    // Lấy sản phẩm sắp hết hàng (stockQuantity < 10)
+    public List<Product> getLowStockProducts() {
+        return repo.findAll().stream()
+                .filter(p -> p.getStockQuantity() < 10)
+                .limit(10)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    // Đếm sản phẩm hết hàng
+    public long getOutOfStockCount() {
+        return repo.findAll().stream()
+                .filter(p -> p.getStockQuantity() == 0)
+                .count();
+    }
 }

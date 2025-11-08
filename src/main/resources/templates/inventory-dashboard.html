@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-primary: #007bff;
+            --color-danger: #dc3545;
+            --color-success: #198754;
+            --color-warning: #ffc107;
+            --color-light-grey: #f9fbfd;
+            --color-grey: #a0a0a0;
+            --color-dark-grey: #838383;
+            --color-dark: #292929;
+            --color-border: #eee;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --border-radius: 12px;
+        }
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--color-light-grey); 
+            color: var(--color-dark); 
+            margin: 0; 
+            padding: 2rem; 
+        }
+        a { text-decoration: none; color: var(--color-primary); }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Header */
+        .page-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 2rem; 
+        }
+        .page-header h1 { 
+            font-size: 1.8rem; 
+            font-weight: 600; 
+            margin: 0;
+        }
+        .breadcrumb {
+            color: var(--color-grey);
+            font-size: 0.9rem;
+        }
+        .breadcrumb a {
+            color: var(--color-primary);
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .kpi-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+        }
+        .kpi-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .kpi-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .kpi-icon.primary {
+            background-color: #e0e7ff;
+            color: #3730a3;
+        }
+        .kpi-icon.warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .kpi-icon.danger {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        .kpi-label {
+            font-size: 0.9rem;
+            color: var(--color-grey);
+            margin-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-dark);
+        }
+
+        /* Table Container */
+        .table-container { 
+            background-color: #fff; 
+            border-radius: var(--border-radius); 
+            box-shadow: var(--box-shadow); 
+            padding: 2rem; 
+            border: 1px solid var(--color-border); 
+        }
+        .table-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 1.5rem; 
+        }
+        .table-header h2 { 
+            font-size: 1.4rem; 
+            font-weight: 600; 
+            margin: 0; 
+        }
+
+        /* Table Style */
+        table.data-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+        }
+        table.data-table th, 
+        table.data-table td { 
+            padding: 1rem 0.5rem; 
+            border-bottom: 1px solid var(--color-border); 
+            text-align: left; 
+            vertical-align: middle; 
+        }
+        table.data-table th { 
+            color: var(--color-grey); 
+            font-weight: 500; 
+            font-size: 0.8rem; 
+            text-transform: uppercase; 
+        }
+        table.data-table td { 
+            color: var(--color-dark); 
+            font-weight: 500; 
+        }
+
+        /* Stock Status */
+        .stock-status {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .stock-status.high {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        .stock-status.low {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .stock-status.out {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.5rem;
+        }
+        .pagination-info { 
+            color: var(--color-dark-grey); 
+            font-size: 0.9rem; 
+        }
+        .pagination-controls { 
+            display: flex; 
+            gap: 0.25rem; 
+        }
+        .pagination-controls a {
+            color: var(--color-dark-grey);
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            transition: background-color 0.3s;
+            border: 1px solid var(--color-border);
+            font-size: 0.9rem;
+        }
+        .pagination-controls a.active,
+        .pagination-controls a:hover {
+            background-color: var(--color-primary);
+            color: #fff;
+            border-color: var(--color-primary);
+        }
+        .pagination-controls a.disabled {
+            color: var(--color-border);
+            pointer-events: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--color-grey);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header class="page-header">
+        <div>
+            <h1>📦 Inventory Dashboard</h1>
+            <p class="breadcrumb">
+                <a href="/">Home</a> / Inventory
+            </p>
+        </div>
+    </header>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+        <!-- Total Products -->
+        <div class="kpi-card">
+            <div class="kpi-card-header">
+                <div>
+                    <div class="kpi-label">Total Products</div>
+                    <div class="kpi-value" th:text="${totalProducts}">0</div>
+                </div>
+                <div class="kpi-icon primary">📦</div>
+            </div>
+        </div>
+
+        <!-- Low Stock -->
+        <div class="kpi-card">
+            <div class="kpi-card-header">
+                <div>
+                    <div class="kpi-label">Low Stock Items</div>
+                    <div class="kpi-value" th:text="${lowStockProducts.size()}">0</div>
+                </div>
+                <div class="kpi-icon warning">⚠️</div>
+            </div>
+        </div>
+
+        <!-- Out of Stock -->
+        <div class="kpi-card">
+            <div class="kpi-card-header">
+                <div>
+                    <div class="kpi-label">Out of Stock</div>
+                    <div class="kpi-value" th:text="${outOfStock}">0</div>
+                </div>
+                <div class="kpi-icon danger">🚫</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Table -->
+    <main class="table-container">
+        <header class="table-header">
+            <h2>All Products in Inventory</h2>
+            <div style="color: var(--color-grey); font-size: 0.9rem;">
+                Sorted by stock quantity (lowest first)
+            </div>
+        </header>
+
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>Stock Code</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock Quantity</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="product : ${productPage.content}">
+                <td>
+                    <strong th:text="${product.id}">PROD001</strong>
+                </td>
+                <td th:text="${product.name}">Product Name</td>
+                <td th:text="${product.category ?: 'N/A'}">Category</td>
+                <td style="color: var(--color-success); font-weight: 600;" 
+                    th:text="'$' + ${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}">$99.99</td>
+                <td>
+                    <strong th:text="${product.stockQuantity}">0</strong>
+                </td>
+                <td>
+                    <span class="stock-status" 
+                          th:classappend="${product.stockQuantity == 0 ? 'out' : (product.stockQuantity < 10 ? 'low' : 'high')}">
+                        <span th:if="${product.stockQuantity == 0}">Out of Stock</span>
+                        <span th:if="${product.stockQuantity > 0 && product.stockQuantity < 10}">Low Stock</span>
+                        <span th:if="${product.stockQuantity >= 10}">In Stock</span>
+                    </span>
+                </td>
+            </tr>
+
+            <tr th:if="${productPage.empty}">
+                <td colspan="6" class="empty-state">
+                    <p>No products found in inventory.</p>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <footer class="pagination" th:if="${productPage.totalPages > 1}">
+
+            <div class="pagination-info">
+                Showing
+                <span th:text="${productPage.number * productPage.size + 1}">1</span>
+                to
+                <span th:text="${productPage.number * productPage.size + productPage.numberOfElements}">10</span>
+                of
+                <span th:text="${productPage.totalElements}">100</span>
+                entries
+            </div>
+
+            <div class="pagination-controls">
+                <a th:href="@{/inventory/dashboard(page=${productPage.number}, size=${productPage.size})}"
+                   th:classappend="${productPage.first ? 'disabled' : ''}">
+                    &laquo; Prev
+                </a>
+
+                <a th:each="pageNum : ${pageNumbers}"
+                   th:href="@{/inventory/dashboard(page=${pageNum}, size=${productPage.size})}"
+                   th:text="${pageNum}"
+                   th:classappend="${pageNum == productPage.number + 1 ? 'active' : ''}">
+                </a>
+
+                <a th:href="@{/inventory/dashboard(page=${productPage.number + 2}, size=${productPage.size})}"
+                   th:classappend="${productPage.last ? 'disabled' : ''}">
+                    Next &raquo;
+                </a>
+            </div>
+        </footer>
+    </main>
+</div>
+
+</body>
+</html>
+

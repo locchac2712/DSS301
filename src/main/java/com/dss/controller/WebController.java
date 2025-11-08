@@ -2,8 +2,10 @@ package com.dss.controller;
 
 import com.dss.model.Product;
 import com.dss.model.Order;
+import com.dss.model.User;
 import com.dss.service.ProductService;
 import com.dss.service.OrderService;
+import com.dss.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,10 +23,12 @@ public class WebController {
 
     private final ProductService productService;
     private final OrderService orderService;
+    private final UserService userService;
 
-    public WebController(ProductService productService, OrderService orderService) {
+    public WebController(ProductService productService, OrderService orderService, UserService userService) {
         this.productService = productService;
         this.orderService = orderService;
+        this.userService = userService;
     }
 
 
@@ -179,5 +183,105 @@ public class WebController {
         model.addAttribute("order", order);
 
         return "order-details";
+    }
+
+    /**
+     * ========================================
+     * USER MANAGEMENT
+     * ========================================
+     */
+
+    /**
+     * 1. USER LIST (Hiển thị Danh sách Người dùng)
+     * Hỗ trợ phân trang
+     */
+    @GetMapping("/users/list")
+    public String showUserList(
+            Model model,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        // (1) Xử lý Pageable (Spring data page bắt đầu từ 0)
+        Pageable pageable = PageRequest.of(
+                page - 1,
+                size,
+                Sort.by("id").ascending()
+        );
+
+        // (2) Lấy dữ liệu Page từ Service
+        Page<User> userPage = userService.getUsers(pageable);
+
+        // (3) Thêm Page object vào Model
+        model.addAttribute("userPage", userPage);
+
+        // (4) Tạo danh sách các số trang để hiển thị trên UI
+        int totalPages = userPage.getTotalPages();
+        if (totalPages > 0) {
+            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
+                    .boxed()
+                    .collect(Collectors.toList());
+            model.addAttribute("pageNumbers", pageNumbers);
+        }
+
+        return "user-list";
+    }
+
+    /**
+     * 2. USER DETAILS (Hiển thị Chi tiết Người dùng)
+     */
+    @GetMapping("/users/details/{id}")
+    public String showUserDetails(@PathVariable("id") Long id, Model model) {
+        User user = userService.getById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + id));
+
+        model.addAttribute("user", user);
+
+        return "user-details";
+    }
+
+    /**
+     * ========================================
+     * INVENTORY DASHBOARD
+     * ========================================
+     */
+
+    /**
+     * INVENTORY DASHBOARD (Quản lý Kho hàng)
+     */
+    @GetMapping("/inventory/dashboard")
+    public String showInventoryDashboard(
+            Model model,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size) {
+
+        // (1) Lấy thống kê
+        long totalProducts = productService.getTotalProducts();
+        long outOfStock = productService.getOutOfStockCount();
+        List<Product> lowStockProducts = productService.getLowStockProducts();
+
+        // (2) Lấy danh sách sản phẩm có phân trang
+        Pageable pageable = PageRequest.of(
+                page - 1,
+                size,
+                Sort.by("stockQuantity").ascending()
+        );
+        Page<Product> productPage = productService.getProducts(null, pageable);
+
+        // (3) Thêm vào Model
+        model.addAttribute("totalProducts", totalProducts);
+        model.addAttribute("outOfStock", outOfStock);
+        model.addAttribute("lowStockProducts", lowStockProducts);
+        model.addAttribute("productPage", productPage);
+
+        // (4) Tạo page numbers
+        int totalPages = productPage.getTotalPages();
+        if (totalPages > 0) {
+            List<Integer> pageNumbers = IntStream.rangeClosed(1, totalPages)
+                    .boxed()
+                    .collect(Collectors.toList());
+            model.addAttribute("pageNumbers", pageNumbers);
+        }
+
+        return "inventory-dashboard";
     }
 }

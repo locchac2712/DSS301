@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seasonal Product Demand Forecasting - DSS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --color-primary: #007bff;
+            --color-success: #198754;
+            --color-warning: #ffc107;
+            --color-danger: #dc3545;
+            --color-light-grey: #f7f8fc;
+            --color-grey: #a0a0a0;
+            --color-dark: #292929;
+            --color-border: #f0f1f7;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--color-light-grey);
+            color: var(--color-dark);
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        .page-header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin: 0 0 0.5rem 0;
+        }
+        .page-header p {
+            color: var(--color-grey);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        /* Form */
+        .form-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+            margin-bottom: 2rem;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--color-grey);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .form-group select {
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1rem;
+            padding: 0.9rem 1.2rem;
+            border: none;
+            background-color: var(--color-light-grey);
+            border-radius: var(--border-radius);
+            border: 2px solid var(--color-light-grey);
+            transition: border-color 0.3s;
+        }
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            background-color: #fff;
+        }
+        .btn-analyze {
+            background-color: var(--color-primary);
+            color: #fff;
+            padding: 0.9rem 2rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-analyze:hover {
+            opacity: 0.9;
+        }
+
+        /* Result Section */
+        .result-section {
+            display: none;
+        }
+        .result-section.show {
+            display: block;
+        }
+
+        /* KPI Cards */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .kpi-card {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+        }
+        .kpi-label {
+            font-size: 0.9rem;
+            color: var(--color-grey);
+            margin-bottom: 0.5rem;
+        }
+        .kpi-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-dark);
+        }
+        .kpi-badge {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+        .kpi-badge.high {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+        .kpi-badge.medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .kpi-badge.low {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        /* Analysis Box */
+        .analysis-box {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 1.5rem;
+            border: 1px solid var(--color-border);
+            margin-bottom: 2rem;
+        }
+        .analysis-box h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 1rem 0;
+        }
+        .analysis-box p {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+        .recommendation {
+            background-color: #e0e7ff;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        /* Table */
+        .table-container {
+            background-color: #fff;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem;
+            border: 1px solid var(--color-border);
+            margin-bottom: 1.5rem;
+        }
+        .table-container h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0 0 1.5rem 0;
+        }
+        table.data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table.data-table th,
+        table.data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-border);
+        }
+        table.data-table th {
+            color: var(--color-grey);
+            font-weight: 500;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            background-color: var(--color-light-grey);
+        }
+        table.data-table td {
+            color: var(--color-dark);
+            font-weight: 500;
+        }
+        .highlight-high {
+            background-color: #fff3cd;
+        }
+        .highlight-low {
+            background-color: #e7f3ff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- Header -->
+    <header class="page-header">
+        <h1>📈 Dự báo Nhu cầu Sản phẩm Theo Mùa</h1>
+        <p>Phân tích xu hướng bán hàng theo tháng và dự báo nhu cầu cho các tháng tới</p>
+    </header>
+
+    <!-- Input Form -->
+    <div class="form-card">
+        <form th:action="@{/dss/seasonal-forecast/analyze}" method="post">
+            <div class="form-grid">
+                <!-- Product Selection -->
+                <div class="form-group">
+                    <label for="stockCode">Chọn Sản phẩm</label>
+                    <select id="stockCode" name="stockCode" required>
+                        <option value="">-- Chọn sản phẩm --</option>
+                        <option th:each="code : ${stockCodes}"
+                                th:value="${code}"
+                                th:text="${code}"
+                                th:selected="${code == selectedStockCode}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Country Selection -->
+                <div class="form-group">
+                    <label for="country">Chọn Quốc gia</label>
+                    <select id="country" name="country" required>
+                        <option value="">-- Chọn quốc gia --</option>
+                        <option th:each="c : ${countries}"
+                                th:value="${c}"
+                                th:text="${c}"
+                                th:selected="${c == selectedCountry}">
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Forecast Period -->
+                <div class="form-group">
+                    <label for="forecastMonths">Số tháng dự báo</label>
+                    <select id="forecastMonths" name="forecastMonths">
+                        <option value="3">3 tháng</option>
+                        <option value="6" selected>6 tháng</option>
+                        <option value="12">12 tháng</option>
+                    </select>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button type="submit" class="btn-analyze">🔍 Phân Tích</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    <div class="result-section" th:classappend="${result.stockCode != null ? 'show' : ''}">
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <!-- Product Info -->
+            <div class="kpi-card">
+                <div class="kpi-label">Sản phẩm</div>
+                <div class="kpi-value" style="font-size: 1.2rem;" th:text="${result.stockCode}">-</div>
+                <div style="font-size: 0.85rem; color: var(--color-grey); margin-top: 0.5rem;" 
+                     th:text="${result.productName}">Product Name</div>
+            </div>
+
+            <!-- Country -->
+            <div class="kpi-card">
+                <div class="kpi-label">Quốc gia</div>
+                <div class="kpi-value" style="font-size: 1.2rem;" th:text="${result.country}">-</div>
+            </div>
+
+            <!-- Seasonality Level -->
+            <div class="kpi-card">
+                <div class="kpi-label">Mức độ Mùa vụ</div>
+                <span class="kpi-badge" 
+                      th:classappend="${result.seasonalityLevel?.toLowerCase()}"
+                      th:text="${result.seasonalityLevel}">-</span>
+                <div style="font-size: 0.85rem; color: var(--color-grey); margin-top: 0.5rem;">
+                    Score: <strong th:text="${#numbers.formatDecimal(result.overallSeasonalityScore, 1, 2)}">0.00</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis and Recommendation -->
+        <div class="analysis-box">
+            <h3>📊 Phân tích</h3>
+            <p th:text="${result.analysis}">Phân tích dữ liệu...</p>
+            
+            <div class="recommendation">
+                <strong>💡 Gợi ý:</strong>
+                <p th:text="${result.recommendation}" style="margin-top: 0.5rem;">Gợi ý...</p>
+            </div>
+        </div>
+
+        <!-- Historical Data Table -->
+        <div class="table-container">
+            <h3>📅 Dữ liệu Lịch sử</h3>
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Tháng</th>
+                    <th>Trung bình Số lượng</th>
+                    <th>Tổng Doanh thu</th>
+                    <th>Chỉ số Mùa vụ</th>
+                    <th>Đánh giá</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="data : ${result.historicalData}"
+                    th:classappend="${data.seasonalityIndex > 1.5 ? 'highlight-high' : (data.seasonalityIndex < 0.5 ? 'highlight-low' : '')}">
+                    <td th:text="${data.monthName}">January</td>
+                    <td th:text="${#numbers.formatDecimal(data.avgQuantity, 1, 0)}">0</td>
+                    <td style="color: var(--color-success); font-weight: 600;" 
+                        th:text="'$' + ${#numbers.formatDecimal(data.totalRevenue, 1, 'COMMA', 2, 'POINT')}">$0.00</td>
+                    <td th:text="${#numbers.formatDecimal(data.seasonalityIndex, 1, 2)}">1.00</td>
+                    <td>
+                        <span th:if="${data.seasonalityIndex > 1.5}" style="color: var(--color-danger); font-weight: 600;">
+                            📈 Cao điểm
+                        </span>
+                        <span th:if="${data.seasonalityIndex >= 0.8 && data.seasonalityIndex <= 1.2}" style="color: var(--color-success);">
+                            ✓ Ổn định
+                        </span>
+                        <span th:if="${data.seasonalityIndex < 0.5}" style="color: var(--color-primary); font-weight: 600;">
+                            📉 Thấp điểm
+                        </span>
+                    </td>
+                </tr>
+                <tr th:if="${result.historicalData == null || result.historicalData.isEmpty()}">
+                    <td colspan="5" style="text-align: center; color: var(--color-grey); padding: 2rem;">
+                        Không có dữ liệu lịch sử
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Forecast Data Table -->
+        <div class="table-container">
+            <h3>🔮 Dự báo cho các tháng tới</h3>
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Tháng</th>
+                    <th>Dự báo Số lượng</th>
+                    <th>Chỉ số Mùa vụ</th>
+                    <th>Xu hướng</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="data : ${result.forecastData}">
+                    <td>
+                        <strong th:text="${data.monthName}">January</strong>
+                        <span style="font-size: 0.8rem; color: var(--color-grey);" 
+                              th:text="' ' + ${data.year}">2024</span>
+                    </td>
+                    <td>
+                        <strong style="font-size: 1.1rem;" 
+                                th:text="${#numbers.formatDecimal(data.forecast, 1, 0)}">0</strong>
+                        <span style="font-size: 0.8rem; color: var(--color-grey);"> units</span>
+                    </td>
+                    <td th:text="${#numbers.formatDecimal(data.seasonalityIndex, 1, 2)}">1.00</td>
+                    <td>
+                        <span th:if="${data.seasonalityIndex > 1.2}" style="color: var(--color-danger); font-weight: 600;">
+                            ↗️ Tăng cao
+                        </span>
+                        <span th:if="${data.seasonalityIndex >= 0.8 && data.seasonalityIndex <= 1.2}" style="color: var(--color-success);">
+                            → Ổn định
+                        </span>
+                        <span th:if="${data.seasonalityIndex < 0.8}" style="color: var(--color-primary); font-weight: 600;">
+                            ↘️ Giảm
+                        </span>
+                    </td>
+                </tr>
+                <tr th:if="${result.forecastData == null || result.forecastData.isEmpty()}">
+                    <td colspan="4" style="text-align: center; color: var(--color-grey); padding: 2rem;">
+                        Chưa có dự báo
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+<script th:inline="javascript">
+    // Show/hide result section based on data
+    document.addEventListener('DOMContentLoaded', function() {
+        var stockCode = /*[[${result.stockCode}]]*/ null;
+        if (stockCode) {
+            document.querySelector('.result-section').classList.add('show');
+        }
+    });
+</script>
+
+</body>
+</html>
+
