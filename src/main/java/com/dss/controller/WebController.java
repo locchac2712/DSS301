@@ -236,7 +236,7 @@ public class WebController {
      * 2. USER DETAILS (Hiển thị Chi tiết Người dùng)
      */
     @GetMapping("/users/details/{id}")
-    public String showUserDetails(@PathVariable("id") Long id, Model model) {
+    public String showUserDetails(@PathVariable("id") Integer id, Model model) {
         User user = userService.getById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + id));
 

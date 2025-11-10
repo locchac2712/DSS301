@@ -43,7 +43,7 @@ public class UserService {
     /**
      * Lấy người dùng theo ID
      */
-    public Optional<User> getById(Long id) {
+    public Optional<User> getById(Integer id) {
         return repo.findById(id);
     }
 
